@@ -15,35 +15,37 @@ public class MenuMain {
                                 "5. Listar pets por algum critério (idade, nome, raça)\n" +
                                 "6. Sair\n" +
                                 "Selecione a sua opção: ");
-            int opcao = input.nextInt();
+            String opcao = input.nextLine();
 
-            if (opcao == 6) {
-                System.out.println("O programa foi encerrado...");
-                break;
-            }
-            else if (opcao == 1) {
-                try (BufferedReader bufferedReader = new BufferedReader(new FileReader(nomeFormulario))) {
-                    String linha;
-                    while ((linha = bufferedReader.readLine()) != null) {
-                        System.out.println(linha);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+            if (opcao.matches("[1-6]")) {
+                int opc = Integer.parseInt(opcao);
+                if (opc == 6) {
+                    System.out.println("O programa foi encerrado...");
+                    break;
                 }
-            }
-            else if (opcao == 2) {
-                System.out.println("teste");
-            }
-            else if (opcao == 3) {
-                System.out.println("teste");
-            }
-            else if (opcao == 4) {
-                System.out.println("teste");
-            }
-            else if (opcao == 5) {
-                System.out.println("teste");
-            }
-            else {
+                else if (opc == 1) {
+                    try (BufferedReader bufferedReader = new BufferedReader(new FileReader(nomeFormulario))) {
+                        String linha;
+                        while ((linha = bufferedReader.readLine()) != null) {
+                            System.out.println(linha);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else if (opc == 2) {
+                    System.out.println("teste");
+                }
+                else if (opc == 3) {
+                    System.out.println("teste");
+                }
+                else if (opc == 4) {
+                    System.out.println("teste");
+                }
+                else if (opc == 5) {
+                    System.out.println("teste");
+                }
+            } else {
                 System.out.println("Opção inválida, tente novamente...");
             }
         }

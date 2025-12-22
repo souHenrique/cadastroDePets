@@ -1,12 +1,17 @@
 package test;
 
+import domain.Pet;
+
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class MenuMain {
     public static void main(String[] args) {
         File nomeFormulario = new File("formulario.txt");
         Scanner input = new Scanner(System.in);
+        List<String> pet = new ArrayList<>();
         while (true) {
             System.out.print("1. Cadastrar um novo pet\n" +
                                 "2. Alterar os dados do pet cadastrado\n" +
@@ -28,6 +33,8 @@ public class MenuMain {
                         String linha;
                         while ((linha = bufferedReader.readLine()) != null) {
                             System.out.println(linha);
+                            String dadoPet = input.nextLine();
+                            pet.add(dadoPet);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

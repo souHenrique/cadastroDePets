@@ -2,6 +2,7 @@ package test;
 
 import domain.PadraoNomeException;
 import domain.Pet;
+import domain.TipoPet;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -51,11 +52,26 @@ public class MenuMain {
                         String nomeCompleto = input.nextLine();
                         Matcher matcherNome = padraoNome.matcher(nomeCompleto);
                         if (!matcherNome.matches()) {
-                            throw new PadraoNomeException("Nome inválido, tente novamente.");
+                            throw new IllegalArgumentException("Nome inválido, tente novamente.");
+                        } else {
+                            pet.add(nomeCompleto);
                         }
 
-                        /*System.out.println(listaPerguntas.get(1));
-                        String tipoPet = input.nextLine();*/
+                        TipoPet tipoPet;
+                        System.out.println(listaPerguntas.get(1));
+                        String tipoPetEscolhido = input.nextLine();
+
+                        try {
+                            tipoPet = TipoPet.valueOf(tipoPetEscolhido.toUpperCase().trim());
+                            pet.add(tipoPet.toString());
+                        } catch (IllegalArgumentException e){
+                            pet.clear();
+                            throw new IllegalArgumentException("Tipo de Pet inválido.");
+                        }
+
+                        for (String petteste : pet) {
+                            System.out.println(petteste);
+                        }
                     }
                     else if (opc == 2) {
                         System.out.println("teste");
@@ -72,7 +88,7 @@ public class MenuMain {
                 } else {
                     System.out.println("Opção inválida, tente novamente...");
                 }
-            } catch (PadraoNomeException e) {
+            } catch (IllegalArgumentException e) {
                 e.printStackTrace();
             }
         }

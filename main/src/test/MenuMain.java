@@ -1,7 +1,7 @@
 package test;
 
-import domain.PadraoNomeException;
 import domain.Pet;
+import domain.SexoDoPet;
 import domain.TipoPet;
 
 import java.io.*;
@@ -59,18 +59,24 @@ public class MenuMain {
 
                         TipoPet tipoPet;
                         System.out.println(listaPerguntas.get(1));
-                        String tipoPetEscolhido = input.nextLine();
-
+                        String tipoPetInformado = input.nextLine();
                         try {
-                            tipoPet = TipoPet.valueOf(tipoPetEscolhido.toUpperCase().trim());
+                            tipoPet = TipoPet.valueOf(tipoPetInformado.toUpperCase().trim());
                             pet.add(tipoPet.toString());
                         } catch (IllegalArgumentException e){
                             pet.clear();
                             throw new IllegalArgumentException("Tipo de Pet inválido.");
                         }
 
-                        for (String petteste : pet) {
-                            System.out.println(petteste);
+                        SexoDoPet sexoDoPet;
+                        System.out.println(listaPerguntas.get(2));
+                        String sexoDoPetInformado = input.nextLine();
+                        try {
+                            sexoDoPet = SexoDoPet.valueOf(sexoDoPetInformado.toUpperCase().trim());
+                            pet.add(sexoDoPet.toString());
+                        } catch (IllegalArgumentException e) {
+                            pet.clear();
+                            throw new IllegalArgumentException("Sexo do Pet Inválido.");
                         }
                     }
                     else if (opc == 2) {

@@ -78,6 +78,11 @@ public class MenuMain {
                             pet.clear();
                             throw new IllegalArgumentException("Sexo do Pet Inválido.");
                         }
+
+                        System.out.println(listaPerguntas.get(3));
+                        System.out.print("Rua: ");
+                        System.out.print("Número da casa: ");
+                        System.out.print(": ");
                     }
                     else if (opc == 2) {
                         System.out.println("teste");

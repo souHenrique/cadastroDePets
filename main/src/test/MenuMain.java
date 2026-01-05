@@ -1,5 +1,6 @@
 package test;
 
+import domain.Endereco;
 import domain.Pet;
 import domain.SexoDoPet;
 import domain.TipoPet;
@@ -16,7 +17,6 @@ public class MenuMain {
         File nomeFormulario = new File("formulario.txt");
         Scanner input = new Scanner(System.in);
         List<String> listaPerguntas = new ArrayList<>();
-        List<String> pet = new ArrayList<>();
         List<Pet> listaPets = new ArrayList<>();
 
         Pattern padraoNome = Pattern.compile("[a-zA-Z]+(\\s[a-zA-Z]+)+");
@@ -53,8 +53,6 @@ public class MenuMain {
                         Matcher matcherNome = padraoNome.matcher(nomeCompleto);
                         if (!matcherNome.matches()) {
                             throw new IllegalArgumentException("Nome inválido, tente novamente.");
-                        } else {
-                            pet.add(nomeCompleto);
                         }
 
                         TipoPet tipoPet;
@@ -62,9 +60,7 @@ public class MenuMain {
                         String tipoPetInformado = input.nextLine();
                         try {
                             tipoPet = TipoPet.valueOf(tipoPetInformado.toUpperCase().trim());
-                            pet.add(tipoPet.toString());
                         } catch (IllegalArgumentException e){
-                            pet.clear();
                             throw new IllegalArgumentException("Tipo de Pet inválido.");
                         }
 
@@ -73,16 +69,22 @@ public class MenuMain {
                         String sexoDoPetInformado = input.nextLine();
                         try {
                             sexoDoPet = SexoDoPet.valueOf(sexoDoPetInformado.toUpperCase().trim());
-                            pet.add(sexoDoPet.toString());
                         } catch (IllegalArgumentException e) {
-                            pet.clear();
                             throw new IllegalArgumentException("Sexo do Pet Inválido.");
                         }
 
                         System.out.println(listaPerguntas.get(3));
-                        System.out.print("Rua: ");
                         System.out.print("Número da casa: ");
-                        System.out.print(": ");
+                        int numeroCasa = input.nextInt();
+                        input.nextLine();
+                        System.out.print("Cidade: ");
+                        String cidade = input.nextLine();
+                        System.out.print("Rua");
+                        String rua = input.nextLine();
+                        Endereco enderecoPet = new Endereco(numeroCasa, cidade, rua
+                        );
+
+                        
                     }
                     else if (opc == 2) {
                         System.out.println("teste");

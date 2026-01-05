@@ -1,18 +1,15 @@
 package domain;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Pet {
     private String nomeCompleto;
     private TipoPet tipoPet;
     private SexoDoPet sexoDoPet;
-    private List<String> endereco = new ArrayList<>();
+    private Endereco endereco;
     private int idade;
     private double peso;
     private String raca;
 
-    public Pet(String nomeCompleto, TipoPet tipoPet, SexoDoPet sexoDoPet, List<String> endereco, int idade, double peso, String raca) {
+    public Pet(String nomeCompleto, TipoPet tipoPet, SexoDoPet sexoDoPet, Endereco endereco, int idade, double peso, String raca) {
         this.nomeCompleto = nomeCompleto;
         this.tipoPet = tipoPet;
         this.sexoDoPet = sexoDoPet;
@@ -46,11 +43,11 @@ public class Pet {
         this.sexoDoPet = sexoDoPet;
     }
 
-    public List<String> getEndereco() {
+    public Endereco getEndereco() {
         return endereco;
     }
 
-    public void setEndereco(List<String> endereco) {
+    public void setEndereco(Endereco endereco) {
         this.endereco = endereco;
     }
 

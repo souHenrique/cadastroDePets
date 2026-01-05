@@ -20,6 +20,7 @@ public class MenuMain {
         List<Pet> listaPets = new ArrayList<>();
 
         Pattern padraoNome = Pattern.compile("[a-zA-Z]+(\\s[a-zA-Z]+)+");
+        Pattern padraoIdadeEPeso = Pattern.compile("^\\d+([,.]\\d+)?$");
 
         while (true) {
             try {
@@ -84,7 +85,22 @@ public class MenuMain {
                         Endereco enderecoPet = new Endereco(numeroCasa, cidade, rua
                         );
 
-                        
+                        System.out.println(listaPerguntas.get(4));
+                        String idadeString = input.nextLine();
+                        Matcher matcherIdade = padraoIdadeEPeso.matcher(idadeString);
+                        double idade = Double.parseDouble(idadeString);
+                        if (!matcherIdade.matches() || idade > 20) {
+                            throw new IllegalArgumentException("Idade inválida.");
+                        }
+
+                        System.out.println(listaPerguntas.get(5));
+                        String pesoString = input.nextLine();
+                        Matcher matcherPeso = padraoIdadeEPeso.matcher(pesoString);
+                        double peso = Double.parseDouble(pesoString);
+                        if (!matcherPeso.matches() || (peso > 60 || peso < 0.5)) {
+                            throw new IllegalArgumentException("Peso inválido.");
+                        }
+
                     }
                     else if (opc == 2) {
                         System.out.println("teste");

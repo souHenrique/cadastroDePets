@@ -1,9 +1,6 @@
 package test;
 
-import domain.Endereco;
-import domain.Pet;
-import domain.SexoDoPet;
-import domain.TipoPet;
+import domain.*;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -19,8 +16,9 @@ public class MenuMain {
         List<String> listaPerguntas = new ArrayList<>();
         List<Pet> listaPets = new ArrayList<>();
 
-        Pattern padraoNome = Pattern.compile("[a-zA-Z]+(\\s[a-zA-Z]+)+");
+        Pattern padraoNome = Pattern.compile("^[a-zA-Z]+(\\s[a-zA-Z]+)+$");
         Pattern padraoIdadeEPeso = Pattern.compile("^\\d+([,.]\\d+)?$");
+        Pattern padraoRaca = Pattern.compile("^[a-zA-Z\\s]+$");
 
         while (true) {
             try {
@@ -52,7 +50,9 @@ public class MenuMain {
                         System.out.println(listaPerguntas.get(0));
                         String nomeCompleto = input.nextLine();
                         Matcher matcherNome = padraoNome.matcher(nomeCompleto);
-                        if (!matcherNome.matches()) {
+                        if (nomeCompleto.isEmpty()) {
+                            nomeCompleto = "NÃO INFORMADO";
+                        } else if (!matcherNome.matches()) {
                             throw new IllegalArgumentException("Nome inválido, tente novamente.");
                         }
 
@@ -76,30 +76,46 @@ public class MenuMain {
 
                         System.out.println(listaPerguntas.get(3));
                         System.out.print("Número da casa: ");
-                        int numeroCasa = input.nextInt();
-                        input.nextLine();
+                        String numeroCasa = input.nextLine();
+                        if (numeroCasa.isEmpty()) {
+                            numeroCasa = "NÃO INFORMADO";
+                        }
                         System.out.print("Cidade: ");
                         String cidade = input.nextLine();
-                        System.out.print("Rua");
+                        System.out.print("Rua: ");
                         String rua = input.nextLine();
                         Endereco enderecoPet = new Endereco(numeroCasa, cidade, rua
                         );
 
                         System.out.println(listaPerguntas.get(4));
-                        String idadeString = input.nextLine();
-                        Matcher matcherIdade = padraoIdadeEPeso.matcher(idadeString);
-                        double idade = Double.parseDouble(idadeString);
-                        if (!matcherIdade.matches() || idade > 20) {
+                        String idade = input.nextLine();
+                        Matcher matcherIdade = padraoIdadeEPeso.matcher(idade);
+                        idade = idade.replace(",", ".");
+                        if (idade.isEmpty()) {
+                            idade = "NÃO INFORMADO";
+                        } else if (!matcherIdade.matches() || Integer.parseInt(idade) > 20) {
                             throw new IllegalArgumentException("Idade inválida.");
                         }
 
                         System.out.println(listaPerguntas.get(5));
-                        String pesoString = input.nextLine();
-                        Matcher matcherPeso = padraoIdadeEPeso.matcher(pesoString);
-                        double peso = Double.parseDouble(pesoString);
-                        if (!matcherPeso.matches() || (peso > 60 || peso < 0.5)) {
+                        String peso = input.nextLine();
+                        Matcher matcherPeso = padraoIdadeEPeso.matcher(peso);
+                        peso = peso.replace(",", ".");
+                        if (peso.isEmpty()) {
+                            peso = "NÃO INFORMADO";
+                        }
+                        if (!matcherPeso.matches() || (Integer.parseInt(peso) > 60 || Integer.parseInt(peso) < 0.5)) {
                             throw new IllegalArgumentException("Peso inválido.");
                         }
+
+                        System.out.println(listaPerguntas.get(6));
+                        String raca = input.nextLine();
+                        Matcher matcherRaca = padraoRaca.matcher(raca);
+                        if (!matcherRaca.matches()) {
+                            throw new IllegalArgumentException("Raça inválida.");
+                        }
+
+                        Pet pet = new Pet(nomeCompleto, tipoPet, sexoDoPet, enderecoPet, idade, peso, raca);
 
                     }
                     else if (opc == 2) {

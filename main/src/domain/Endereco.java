@@ -1,21 +1,21 @@
 package domain;
 
 public class Endereco {
-    private int numeroCasa;
+    private String numeroCasa;
     private String cidade;
     private String rua;
 
-    public Endereco(int numeroCasa, String cidade, String rua) {
+    public Endereco(String numeroCasa, String cidade, String rua) {
         this.numeroCasa = numeroCasa;
         this.cidade = cidade;
         this.rua = rua;
     }
 
-    public int getNumeroCasa() {
+    public String getNumeroCasa() {
         return numeroCasa;
     }
 
-    public void setNumeroCasa(int numeroCasa) {
+    public void setNumeroCasa(String numeroCasa) {
         this.numeroCasa = numeroCasa;
     }
 

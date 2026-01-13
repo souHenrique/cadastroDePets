@@ -3,6 +3,7 @@ package test;
 import domain.*;
 
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -11,10 +12,12 @@ import java.util.regex.Pattern;
 
 public class MenuMain {
     public static void main(String[] args) {
-        File nomeFormulario = new File("formulario.txt");
         Scanner input = new Scanner(System.in);
         List<String> listaPerguntas = new ArrayList<>();
         List<Pet> listaPets = new ArrayList<>();
+
+        File nomeFormulario = new File("formulario.txt");
+        File pastaPetsCadastrados = new File("petsCadastrados");
 
         Pattern padraoNome = Pattern.compile("^[a-zA-Z]+(\\s[a-zA-Z]+)+$");
         Pattern padraoIdadeEPeso = Pattern.compile("^\\d+([,.]\\d+)?$");
@@ -93,7 +96,7 @@ public class MenuMain {
                         idade = idade.replace(",", ".");
                         if (idade.isEmpty()) {
                             idade = "NÃO INFORMADO";
-                        } else if (!matcherIdade.matches() || Integer.parseInt(idade) > 20) {
+                        } else if (!matcherIdade.matches() || Double.parseDouble(idade) > 20) {
                             throw new IllegalArgumentException("Idade inválida.");
                         }
 
@@ -103,8 +106,7 @@ public class MenuMain {
                         peso = peso.replace(",", ".");
                         if (peso.isEmpty()) {
                             peso = "NÃO INFORMADO";
-                        }
-                        if (!matcherPeso.matches() || (Integer.parseInt(peso) > 60 || Integer.parseInt(peso) < 0.5)) {
+                        } else if (!matcherPeso.matches() || (Double.parseDouble(peso) > 60 || Double.parseDouble(peso) < 0.5)) {
                             throw new IllegalArgumentException("Peso inválido.");
                         }
 
@@ -117,6 +119,25 @@ public class MenuMain {
 
                         Pet pet = new Pet(nomeCompleto, tipoPet, sexoDoPet, enderecoPet, idade, peso, raca);
 
+                        try {
+                            if (!pastaPetsCadastrados.exists()) {
+                                pastaPetsCadastrados.mkdirs();
+                            }
+                        } catch (Exception e) {
+                            System.out.println("Erro ao criar a pasta.");
+                        }
+
+                        LocalDateTime dataAtual = LocalDateTime.now();
+                        String nomeArquivoFormatado = dataAtual.getYear() + "" + dataAtual.getMonthValue() + "" + dataAtual.getDayOfMonth() + "T" + dataAtual.getHour() + "" + dataAtual.getMinute() + "-" + nomeCompleto.replaceAll("\\s", "").toUpperCase();
+                        File petCadastrado = new File(pastaPetsCadastrados, nomeArquivoFormatado + ".txt");
+
+                        try {
+                            if (!petCadastrado.exists()) {
+                                petCadastrado.createNewFile();
+                            }
+                        } catch (IOException e) {
+                            System.out.println("Erro ao criar o arquivo.");
+                        }
                     }
                     else if (opc == 2) {
                         System.out.println("teste");

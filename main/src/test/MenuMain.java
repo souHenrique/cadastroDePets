@@ -138,6 +138,26 @@ public class MenuMain {
                         } catch (IOException e) {
                             System.out.println("Erro ao criar o arquivo.");
                         }
+
+                        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(petCadastrado))) {
+                            bufferedWriter.write("1 - " + nomeCompleto);
+                            bufferedWriter.newLine();
+                            bufferedWriter.write("2 - " + tipoPet);
+                            bufferedWriter.newLine();
+                            bufferedWriter.write("3 - " + sexoDoPet);
+                            bufferedWriter.newLine();
+                            bufferedWriter.write("4 - " + enderecoPet.getRua() + ", " + enderecoPet.getNumeroCasa() + ", " + enderecoPet.getCidade());
+                            bufferedWriter.newLine();
+                            bufferedWriter.write("5 - " + idade + " anos");
+                            bufferedWriter.newLine();
+                            bufferedWriter.write("6 - " + peso + "kg");
+                            bufferedWriter.newLine();
+                            bufferedWriter.write("7 - " + raca);
+                            bufferedWriter.newLine();
+                        } catch (IOException e) {
+                            System.out.println("Erro ao escrever no arquivo.");
+                        }
+                        
                     }
                     else if (opc == 2) {
                         System.out.println("teste");

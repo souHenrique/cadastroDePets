@@ -160,30 +160,7 @@ public class MenuMain {
 
                     }
                     else if (opc == 2) {
-                        while (true) {
-                            System.out.println("Digite o tipo de animal deseja buscar: ");
-                            String tipoPetString = input.nextLine();
-                            System.out.println("Você deseja utilizar 1 ou 2 critérios de busca? ");
-                            int quantCriterios = input.nextInt();
-                            if (quantCriterios == 1 || quantCriterios == 2) {
-                                System.out.println("Você pode buscar o pet por: ");
-                                System.out.println("Nome ou sobrenome;\n" +
-                                        "Sexo;\n" +
-                                        "Idade;n" +
-                                        "Peso;\n" +
-                                        "Raça;\n" +
-                                        "Endereço;");
-                                System.out.println("Selecione o seu critério de busca: ");
-                                String primeiroCriterioBusca = input.nextLine();
-                            }
-                            if (quantCriterios == 2) {
-                                System.out.println("Selecione o segundo critério de busca: ");
-                                String segundoCriterioBusca = input.nextLine();
-                            }
-                            else {
-                                System.out.println("Opção inválida.");
-                            }
-                        }
+                        System.out.println("teste");
                     }
                     else if (opc == 3) {
                         System.out.println("teste");
@@ -192,7 +169,41 @@ public class MenuMain {
                         System.out.println("teste");
                     }
                     else if (opc == 5) {
-                        System.out.println("teste");
+                        while (true) {
+                            TipoPet tipoPet;
+                            System.out.println("Digite o tipo de animal deseja buscar: ");
+                            String tipoPetString = input.nextLine();
+                            try {
+                                tipoPet = TipoPet.valueOf(tipoPetString.toUpperCase().trim());
+                            } catch (IllegalArgumentException e){
+                                throw new IllegalArgumentException("Tipo de Pet inválido.");
+                            }
+
+                            while (true) {
+                                System.out.println("Você deseja utilizar 1 ou 2 critérios de busca? ");
+                                int quantCriterios = input.nextInt();
+                                input.nextLine();
+                                if (quantCriterios == 1 || quantCriterios == 2) {
+                                    System.out.println("Você pode buscar o pet por: ");
+                                    System.out.println("- Nome ou sobrenome;\n" +
+                                            "- Sexo;\n" +
+                                            "- Idade\n" +
+                                            "- Peso;\n" +
+                                            "- Raça;\n" +
+                                            "- Endereço;");
+                                    System.out.println("Selecione o seu critério de busca: ");
+                                    String primeiroCriterioBusca = input.nextLine();
+                                }
+                                if (quantCriterios == 2) {
+                                    System.out.println("Selecione o segundo critério de busca: ");
+                                    String segundoCriterioBusca = input.nextLine();
+                                }
+                                else {
+                                    System.out.println("Opção inválida.");
+                                    break;
+                                }
+                            }
+                        }
                     }
                 } else {
                     System.out.println("Opção inválida, tente novamente...");

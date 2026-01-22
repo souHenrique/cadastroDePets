@@ -8,15 +8,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class buscarCriterio {
-    List<String> listaRespostas = new ArrayList<>();
 
-    public void buscarCriterioNoArquivo(File arquivo, String criterio, int posicao) {
+    public static void buscarCriterioNoArquivo(File arquivo, String criterio) {
+        List<String> listaRespostas = new ArrayList<>();
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(arquivo))) {
             String linha;
+            int posicao = 1;
 
             while ((linha = bufferedReader.readLine()) != null) {
                 if (linha.contains(criterio)) {
                     System.out.print(posicao + ". ");
+                    posicao++;
                     while ((linha = bufferedReader.readLine()) != null) {
                         listaRespostas.add(linha);
                     }

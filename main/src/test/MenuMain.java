@@ -192,17 +192,21 @@ public class MenuMain {
                                         "- Endereço;");
                                 System.out.println("Selecione o seu critério de busca: ");
                                 String primeiroCriterioBusca = input.nextLine();
+
+                                buscarArquivo.buscarArquivoNaPasta("petsCadastrados", primeiroCriterioBusca);
+                                System.out.println("==============================================================");
+                                if (quantCriterios == 1) {
+                                    break;
+                                }
                             }
                             if (quantCriterios == 2) {
                                 System.out.println("Selecione o segundo critério de busca: ");
                                 String segundoCriterioBusca = input.nextLine();
                             }
-                            else {
+                            else if (quantCriterios != 1 && quantCriterios != 2) {
                                 System.out.println("Opção inválida.");
                                 break;
                             }
-
-
                         }
                     }
                 } else {

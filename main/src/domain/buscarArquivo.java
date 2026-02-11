@@ -6,16 +6,23 @@ public class buscarArquivo {
 
     public static void buscarArquivoNaPasta(String caminhoPastaPet, String criterio) {
         File pastaPet = new File(caminhoPastaPet);
+        int posicao = 1;
 
         if (pastaPet.exists() && pastaPet.isDirectory()) {
             File[] listaArquivosPet = pastaPet.listFiles();
             if (listaArquivosPet != null) {
                 for (File arquivoPet : listaArquivosPet) {
                     if (arquivoPet.isFile() && arquivoPet.getName().endsWith(".txt")) {
+                        System.out.print(posicao + ". ");
+                        posicao++;
                         buscarCriterio.buscarCriterioNoArquivo(arquivoPet, criterio);
                     }
                 }
             }
         }
+    }
+
+    public static void buscarArquivoNaPasta(String caminhoPastaPet, String criterio1, String criterio2) {
+
     }
 }

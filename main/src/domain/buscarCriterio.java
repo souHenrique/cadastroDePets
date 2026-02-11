@@ -13,22 +13,19 @@ public class buscarCriterio {
         List<String> listaRespostas = new ArrayList<>();
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(arquivo))) {
             String linha;
-            int posicao = 1;
 
             while ((linha = bufferedReader.readLine()) != null) {
-                if (linha.contains(criterio)) {
-                    System.out.print(posicao + ". ");
-                    posicao++;
-                    while ((linha = bufferedReader.readLine()) != null) {
-                        listaRespostas.add(linha);
-                    }
-                    int quantidadeRespostas = 0;
-                    for (String resposta : listaRespostas) {
-                        if (quantidadeRespostas < listaRespostas.size()) {
-                            System.out.print(resposta + " - ");
-                            quantidadeRespostas++;
-                        } else {
-                            System.out.print(resposta);
+                listaRespostas.add(linha.substring(4));
+            }
+            for (String resposta : listaRespostas) {
+                if (resposta.equalsIgnoreCase(criterio)) {
+                    for (int i = 0; i < listaRespostas.size(); i++) {
+                        System.out.print(listaRespostas.get(i));
+                        if (i < listaRespostas.size() - 1) {
+                            System.out.print(" - ");
+                        }
+                        else {
+                            System.out.println();
                         }
                     }
                 }

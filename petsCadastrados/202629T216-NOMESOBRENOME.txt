@@ -1,0 +1,7 @@
+1 - nome sobrenome
+2 - GATO
+3 - MACHO
+4 - rua, 5, cidade
+5 - 12 anos
+6 - 20kg
+7 - laranja

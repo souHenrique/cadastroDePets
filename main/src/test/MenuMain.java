@@ -182,7 +182,7 @@ public class MenuMain {
                             System.out.println("Você deseja utilizar 1 ou 2 critérios de busca? ");
                             int quantCriterios = input.nextInt();
                             input.nextLine();
-                            if (quantCriterios == 1 || quantCriterios == 2) {
+                            if (quantCriterios == 1) {
                                 System.out.println("Você pode buscar o pet por: ");
                                 System.out.println("- Nome ou sobrenome;\n" +
                                         "- Sexo;\n" +
@@ -195,15 +195,27 @@ public class MenuMain {
 
                                 buscarArquivo.buscarArquivoNaPasta("petsCadastrados", primeiroCriterioBusca);
                                 System.out.println("==============================================================");
-                                if (quantCriterios == 1) {
-                                    break;
-                                }
+                                break;
                             }
-                            if (quantCriterios == 2) {
+                            else if (quantCriterios == 2) {
+                                System.out.println("Você pode buscar o pet por: ");
+                                System.out.println("- Nome ou sobrenome;\n" +
+                                        "- Sexo;\n" +
+                                        "- Idade\n" +
+                                        "- Peso;\n" +
+                                        "- Raça;\n" +
+                                        "- Endereço;");
+                                System.out.println("Selecione o seu critério de busca: ");
+                                String primeiroCriterioBusca = input.nextLine();
+
                                 System.out.println("Selecione o segundo critério de busca: ");
                                 String segundoCriterioBusca = input.nextLine();
+
+                                buscarArquivo.buscarArquivoNaPasta("petsCadastrados", primeiroCriterioBusca, segundoCriterioBusca);
+                                System.out.println("==============================================================");
+                                break;
                             }
-                            else if (quantCriterios != 1 && quantCriterios != 2) {
+                            else {
                                 System.out.println("Opção inválida.");
                                 break;
                             }

@@ -10,67 +10,71 @@ import java.util.List;
 public class buscarCriterio {
 
     public static void buscarCriterioNoArquivo(File arquivo, String criterio) {
-        boolean encontrou = false;
         List<String> listaRespostas = new ArrayList<>();
+        int contaEncontros = 0;
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(arquivo))) {
             String linha;
 
             while ((linha = bufferedReader.readLine()) != null) {
                 listaRespostas.add(linha.substring(4));
             }
-            for (String resposta : listaRespostas) {
-                if (resposta.equalsIgnoreCase(criterio)) {
-                    encontrou = true;
-                    for (int i = 0; i < listaRespostas.size(); i++) {
-                        System.out.print(listaRespostas.get(i));
-                        if (i < listaRespostas.size() - 1) {
-                            System.out.print(" - ");
-                        }
-                        else {
-                            System.out.println();
-                        }
-                    }
-                }
+
+            boolean encontrou = existeNaLista(listaRespostas, criterio);
+
+            if (encontrou) {
+                imprimeBuscaComCriterio(listaRespostas);
+                contaEncontros++;
             }
+
         } catch (IOException e) {
             System.out.println("Erro na busca.");
         }
-        if (!encontrou) {
-            System.out.println("Nenhum valor encontrado.");
+
+        if (contaEncontros == 0) {
+            System.out.println("Nenhum resultado encontrado.");
         }
     }
 
-    //CORRIGIR: PRECISA MOSTRAR APENAS OS QUE TIVEREM AMBOS OS CRITÉRIOS
-
     public static void buscarCriterioNoArquivo(File arquivo, String criterio1, String criterio2) {
         List<String> listaRespostas = new ArrayList<>();
-        boolean encontrou = false;
+        int contaEncontros = 0;
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(arquivo))) {
             String linha;
-
 
             while ((linha = bufferedReader.readLine()) != null) {
                 listaRespostas.add(linha.substring(4));
             }
-            for (String resposta : listaRespostas) {
-                if (resposta.equalsIgnoreCase(criterio1) || resposta.equalsIgnoreCase(criterio2)) {
-                    encontrou = true;
-                    for (int i = 0; i < listaRespostas.size(); i++) {
-                        System.out.print(listaRespostas.get(i));
-                        if (i < listaRespostas.size() - 1) {
-                            System.out.print(" - ");
-                        }
-                        else {
-                            System.out.println();
-                        }
-                    }
-                }
+
+            boolean encontrou1 = existeNaLista(listaRespostas, criterio1);
+            boolean encontrou2 = existeNaLista(listaRespostas, criterio2);
+
+            if (encontrou1 && encontrou2) {
+                imprimeBuscaComCriterio(listaRespostas);
+                contaEncontros++;
             }
+
         } catch (IOException e) {
             System.out.println("Erro na busca.");
         }
-        if (!encontrou) {
-            System.out.println("Nenhum valor encontrado.");
+        if (contaEncontros == 0) {
+            System.out.println("Nenhum resultado encontrado.");
         }
+    }
+
+    private static boolean existeNaLista(List<String> listaRespostas, String criterio) {
+        String criterioMinusculo = criterio.trim().toLowerCase();
+
+        for (String resposta : listaRespostas) {
+            String respostaMinuscula = resposta.toLowerCase();
+            if (respostaMinuscula.contains((criterioMinusculo))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void imprimeBuscaComCriterio(List<String> listaRespostas) {
+        String resultado = String.join(" - ", listaRespostas);
+        System.out.println(resultado);
     }
 }

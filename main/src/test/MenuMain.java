@@ -23,8 +23,12 @@ public class MenuMain {
         Pattern padraoIdadeEPeso = Pattern.compile("^\\d+([,.]\\d+)?$");
         Pattern padraoRaca = Pattern.compile("^[a-zA-Z\\s]+$");
 
+        System.out.println("==================================================================================");
+        System.out.println("                                  PET SHOP");
+
         while (true) {
             try {
+                System.out.println("==================================================================================");
                 System.out.print("1. Cadastrar um novo pet\n" +
                         "2. Alterar os dados do pet cadastrado\n" +
                         "3. Deletar um pet cadastrado\n" +

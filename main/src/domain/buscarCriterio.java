@@ -1,80 +1,48 @@
 package domain;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.text.Normalizer;
 
 public class buscarCriterio {
 
-    public static void buscarCriterioNoArquivo(File arquivo, String criterio) {
-        List<String> listaRespostas = new ArrayList<>();
-        int contaEncontros = 0;
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(arquivo))) {
-            String linha;
+    public static boolean correspondeAoCriterio(Pet pet, String criterio, String valorBuscado) {
+        String criterioNormalizado = normalizar(criterio);
+        String valorNormalizado = normalizar(valorBuscado);
 
-            while ((linha = bufferedReader.readLine()) != null) {
-                listaRespostas.add(linha.substring(4));
-            }
+        switch (criterioNormalizado) {
+            case "nome":
+                return normalizar(pet.getNomeCompleto()).contains(valorNormalizado);
 
-            boolean encontrou = existeNaLista(listaRespostas, criterio);
+            case "sexo":
+                return normalizar(pet.getSexoDoPet().name()).contains(valorNormalizado);
 
-            if (encontrou) {
-                imprimeBuscaComCriterio(listaRespostas);
-                contaEncontros++;
-            }
+            case "idade":
+                return normalizar(pet.getIdade()).contains(valorNormalizado);
 
-        } catch (IOException e) {
-            System.out.println("Erro na busca.");
-        }
+            case "peso":
+                return normalizar(pet.getPeso()).contains(valorNormalizado);
 
-        if (contaEncontros == 0) {
-            System.out.println("Nenhum resultado encontrado.");
-        }
-    }
+            case "raca":
+            case "raça":
+                return normalizar(pet.getRaca()).contains(valorNormalizado);
 
-    public static void buscarCriterioNoArquivo(File arquivo, String criterio1, String criterio2) {
-        List<String> listaRespostas = new ArrayList<>();
-        int contaEncontros = 0;
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(arquivo))) {
-            String linha;
+            case "endereco":
+            case "endereço":
+                String enderecoCompleto = pet.getEndereco().getRua() + " " +
+                        pet.getEndereco().getNumeroCasa() + " " +
+                        pet.getEndereco().getCidade();
+                return normalizar(enderecoCompleto).contains(valorNormalizado);
 
-            while ((linha = bufferedReader.readLine()) != null) {
-                listaRespostas.add(linha.substring(4));
-            }
-
-            boolean encontrou1 = existeNaLista(listaRespostas, criterio1);
-            boolean encontrou2 = existeNaLista(listaRespostas, criterio2);
-
-            if (encontrou1 && encontrou2) {
-                imprimeBuscaComCriterio(listaRespostas);
-                contaEncontros++;
-            }
-
-        } catch (IOException e) {
-            System.out.println("Erro na busca.");
-        }
-        if (contaEncontros == 0) {
-            System.out.println("Nenhum resultado encontrado.");
+            default:
+                throw new IllegalArgumentException("Critério inválido.");
         }
     }
 
-    private static boolean existeNaLista(List<String> listaRespostas, String criterio) {
-        String criterioMinusculo = criterio.trim().toLowerCase();
-
-        for (String resposta : listaRespostas) {
-            String respostaMinuscula = resposta.toLowerCase();
-            if (respostaMinuscula.contains((criterioMinusculo))) {
-                return true;
-            }
+    private static String normalizar(String texto) {
+        if (texto == null) {
+            return "";
         }
-        return false;
-    }
 
-    private static void imprimeBuscaComCriterio(List<String> listaRespostas) {
-        String resultado = String.join(" - ", listaRespostas);
-        System.out.println(resultado);
+        String textoNormalizado = Normalizer.normalize(texto, Normalizer.Form.NFD);
+        return textoNormalizado.replaceAll("\\p{M}", "").toLowerCase().trim();
     }
 }

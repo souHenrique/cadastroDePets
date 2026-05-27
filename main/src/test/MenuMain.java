@@ -175,9 +175,9 @@ public class MenuMain {
                         }
 
                         LocalDateTime dataAtual = LocalDateTime.now();
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyMMdd'T'HHmm");
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmm");
                         String nomePetArquivo = nomeCompleto.replaceAll("\\s", "").toUpperCase();
-                        String nomeArquivoFormatado = dataAtual.format(formatter) + "-" + nomePetArquivo + ".txt";
+                        String nomeArquivoFormatado = dataAtual.format(formatter) + "-" + nomePetArquivo + ".TXT";
                         File petCadastrado = new File(pastaPetsCadastrados, nomeArquivoFormatado);
 
                         try {
@@ -200,9 +200,9 @@ public class MenuMain {
                             bufferedWriter.newLine();
                             bufferedWriter.write("4 - " + enderecoPet.getRua() + ", " + enderecoPet.getNumeroCasa() + ", " + enderecoPet.getCidade());
                             bufferedWriter.newLine();
-                            bufferedWriter.write("5 - " + idadeFormatada + " anos");
+                            bufferedWriter.write("5 - " + idadeFormatada);
                             bufferedWriter.newLine();
-                            bufferedWriter.write("6 - " + pesoFormatado + "kg");
+                            bufferedWriter.write("6 - " + pesoFormatado);
                             bufferedWriter.newLine();
                             bufferedWriter.write("7 - " + raca);
                             bufferedWriter.newLine();
@@ -221,63 +221,72 @@ public class MenuMain {
                         System.out.println("teste");
                     }
                     else if (opc == 5) {
-                        while (true) {
-                            TipoPet tipoPet;
-                            System.out.println("Digite o tipo de animal deseja buscar: ");
-                            String tipoPetString = input.nextLine();
-                            try {
-                                tipoPet = TipoPet.valueOf(tipoPetString.toUpperCase().trim());
-                            } catch (IllegalArgumentException e){
-                                throw new IllegalArgumentException("Tipo de Pet inválido.");
-                            }
+                        TipoPet tipoPet;
+                        System.out.println("Digite o tipo de animal que deseja buscar: ");
+                        String tipoPetString = input.nextLine();
 
-                            System.out.println("Você deseja utilizar 1 ou 2 critérios de busca? ");
-                            int quantCriterios = input.nextInt();
-                            input.nextLine();
-                            if (quantCriterios == 1) {
-                                System.out.println("Você pode buscar o pet por: ");
-                                System.out.println("- Nome ou sobrenome;\n" +
-                                        "- Sexo;\n" +
-                                        "- Idade\n" +
-                                        "- Peso;\n" +
-                                        "- Raça;\n" +
-                                        "- Endereço;");
-                                System.out.println("Selecione o seu critério de busca: ");
-                                String primeiroCriterioBusca = input.nextLine();
+                        try {
+                            tipoPet = TipoPet.valueOf(tipoPetString.toUpperCase().trim());
+                        } catch (IllegalArgumentException e){
+                            throw new IllegalArgumentException("Tipo de Pet inválido.");
+                        }
 
-                                buscarArquivo.buscarArquivoNaPasta("petsCadastrados", primeiroCriterioBusca);
-                                System.out.println("==============================================================");
-                                break;
-                            }
-                            else if (quantCriterios == 2) {
-                                System.out.println("Você pode buscar o pet por: ");
-                                System.out.println("- Nome ou sobrenome;\n" +
-                                        "- Sexo;\n" +
-                                        "- Idade\n" +
-                                        "- Peso;\n" +
-                                        "- Raça;\n" +
-                                        "- Endereço;");
-                                System.out.println("Selecione o seu critério de busca: ");
-                                String primeiroCriterioBusca = input.nextLine();
+                        System.out.println("Você deseja utilizar 1 ou 2 critérios de busca? ");
+                        String quantidadeTexto = input.nextLine().trim();
 
-                                System.out.println("Selecione o segundo critério de busca: ");
-                                String segundoCriterioBusca = input.nextLine();
+                        if (!quantidadeTexto.matches("[12]")) {
+                            throw new IllegalArgumentException("Digite apenas 1 ou 2.");
+                        }
 
-                                buscarArquivo.buscarArquivoNaPasta("petsCadastrados", primeiroCriterioBusca, segundoCriterioBusca);
-                                System.out.println("==============================================================");
-                                break;
-                            }
-                            else {
-                                System.out.println("Opção inválida.");
-                                break;
+                        int quantCriterios = Integer.parseInt(quantidadeTexto);
+
+                        System.out.println("Critérios disponíveis: nome, sexo, idade, peso, raca, endereco");
+                        System.out.print("Digite o primeiro critério: ");
+                        String criterio1 = input.nextLine().trim();
+
+                        System.out.print("Digite o valor do primeiro critério: ");
+                        String valor1 = input.nextLine().trim();
+
+                        List<Pet> resultados;
+
+                        if (quantCriterios == 1) {
+                            resultados = buscarArquivo.buscarPets("petsCadastrados", tipoPet, criterio1, valor1);
+                        } else {
+                            System.out.print("Digite o segundo critério: ");
+                            String criterio2 = input.nextLine().trim();
+
+                            System.out.print("Digite o valor do segundo critério: ");
+                            String valor2 = input.nextLine().trim();
+
+                            resultados = buscarArquivo.buscarPets("petsCadastrados", tipoPet, criterio1, valor1, criterio2, valor2);
+                        }
+
+                        if (resultados.isEmpty()) {
+                            System.out.println("Nenhum resultado encontrado.");
+                        } else {
+                            for (int i = 0; i < resultados.size(); i++) {
+                                Pet pet = resultados.get(i);
+
+                                System.out.println((i + 1) + ". " +
+                                        pet.getNomeCompleto() + " - " +
+                                        pet.getTipoPet() + " - " +
+                                        pet.getSexoDoPet() + " - " +
+                                        pet.getEndereco().getRua() + ", " +
+                                        pet.getEndereco().getNumeroCasa() + " - " +
+                                        pet.getEndereco().getCidade() + " - " +
+                                        pet.getIdade() + " - " +
+                                        pet.getPeso() + " - " +
+                                        pet.getRaca());
                             }
                         }
+
+                        System.out.println("==============================================================");
                     }
                 } else {
                     System.out.println("Opção inválida, tente novamente...");
                 }
             } catch (IllegalArgumentException e) {
-                e.printStackTrace();
+                System.out.println(e.getMessage());
             }
         }
     }

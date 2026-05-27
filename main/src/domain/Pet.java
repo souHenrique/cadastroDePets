@@ -1,5 +1,8 @@
 package domain;
 
+import enums.SexoDoPet;
+import enums.TipoPet;
+
 public class Pet {
     private String nomeCompleto;
     private TipoPet tipoPet;

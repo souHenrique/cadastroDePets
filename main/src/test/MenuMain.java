@@ -1,9 +1,12 @@
 package test;
 
 import domain.*;
+import enums.SexoDoPet;
+import enums.TipoPet;
 
 import java.io.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -11,6 +14,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MenuMain {
+
+    private static final String NAO_INFORMADO = "NÃO INFORMADO";
+
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
         List<String> listaPerguntas = new ArrayList<>();
@@ -45,6 +51,7 @@ public class MenuMain {
                         break;
                     }
                     else if (opc == 1) {
+                        listaPerguntas.clear();
                         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(nomeFormulario))) {
                             String linha;
                             while ((linha = bufferedReader.readLine()) != null) {
@@ -55,11 +62,12 @@ public class MenuMain {
                         }
 
                         System.out.println(listaPerguntas.get(0));
-                        String nomeCompleto = input.nextLine();
+                        String nomeCompleto = input.nextLine().trim();
                         Matcher matcherNome = padraoNome.matcher(nomeCompleto);
-                        if (nomeCompleto.isEmpty()) {
-                            nomeCompleto = "NÃO INFORMADO";
-                        } else if (!matcherNome.matches()) {
+                        if (nomeCompleto.isBlank()) {
+                            throw new IllegalArgumentException("O pet deve ter um nome e sobrenome.");
+                        }
+                        if (!matcherNome.matches()) {
                             throw new IllegalArgumentException("Nome inválido, tente novamente.");
                         }
 
@@ -83,45 +91,80 @@ public class MenuMain {
 
                         System.out.println(listaPerguntas.get(3));
                         System.out.print("Número da casa: ");
-                        String numeroCasa = input.nextLine();
-                        if (numeroCasa.isEmpty()) {
-                            numeroCasa = "NÃO INFORMADO";
+                        String numeroCasa = input.nextLine().trim();
+                        if (numeroCasa.isBlank()) {
+                            numeroCasa = NAO_INFORMADO;
                         }
                         System.out.print("Cidade: ");
-                        String cidade = input.nextLine();
+                        String cidade = input.nextLine().trim();
+                        if (cidade.isBlank()) cidade = NAO_INFORMADO;
                         System.out.print("Rua: ");
-                        String rua = input.nextLine();
+                        String rua = input.nextLine().trim();
+                        if (rua.isBlank()) rua = NAO_INFORMADO;
                         Endereco enderecoPet = new Endereco(numeroCasa, cidade, rua
                         );
 
                         System.out.println(listaPerguntas.get(4));
-                        String idade = input.nextLine();
-                        Matcher matcherIdade = padraoIdadeEPeso.matcher(idade);
-                        idade = idade.replace(",", ".");
-                        if (idade.isEmpty()) {
-                            idade = "NÃO INFORMADO";
-                        } else if (!matcherIdade.matches() || Double.parseDouble(idade) > 20) {
-                            throw new IllegalArgumentException("Idade inválida.");
+                        String idadeTexto = input.nextLine().trim();
+                        String idadeSalva;
+                        if (idadeTexto.isBlank()) {
+                            idadeSalva = NAO_INFORMADO;
+                        } else {
+                            idadeTexto = idadeTexto.replace(",", ".");
+                            Matcher matcherIdade = padraoIdadeEPeso.matcher(idadeTexto);
+
+                            if (!matcherIdade.matches()) {
+                                throw new IllegalArgumentException("Idade inválida. Digite apenas números.");
+                            }
+
+                            double idadeValor = Double.parseDouble(idadeTexto);
+
+                            if (idadeValor > 20) {
+                                throw new IllegalArgumentException("Idade inválida. O pet não pode ter mais de 20 anos.");
+                            }
+
+                            if (idadeValor < 1) {
+                                idadeSalva = String.valueOf(idadeValor);
+                            } else {
+                                idadeSalva = String.valueOf(idadeValor);
+                            }
                         }
 
                         System.out.println(listaPerguntas.get(5));
-                        String peso = input.nextLine();
-                        Matcher matcherPeso = padraoIdadeEPeso.matcher(peso);
-                        peso = peso.replace(",", ".");
-                        if (peso.isEmpty()) {
-                            peso = "NÃO INFORMADO";
-                        } else if (!matcherPeso.matches() || (Double.parseDouble(peso) > 60 || Double.parseDouble(peso) < 0.5)) {
-                            throw new IllegalArgumentException("Peso inválido.");
+                        String pesoTexto = input.nextLine().trim();
+
+                        String pesoSalvo;
+                        if (pesoTexto.isBlank()) {
+                            pesoSalvo = NAO_INFORMADO;
+                        } else {
+                            pesoTexto = pesoTexto.replace(",", ".");
+                            Matcher matcherPeso = padraoIdadeEPeso.matcher(pesoTexto);
+
+                            if (!matcherPeso.matches()) {
+                                throw new IllegalArgumentException(("Peso inválido. Digite apenas números."));
+                            }
+
+                            double pesoValor = Double.parseDouble(pesoTexto);
+
+                            if (pesoValor > 60 || pesoValor < 0.5) {
+                                throw new IllegalArgumentException("Peso inválido. O peso deve estar entre 0.5kg e 60kg.");
+                            }
+
+                            pesoSalvo = String.valueOf(pesoValor);
                         }
 
                         System.out.println(listaPerguntas.get(6));
-                        String raca = input.nextLine();
-                        Matcher matcherRaca = padraoRaca.matcher(raca);
-                        if (!matcherRaca.matches()) {
-                            throw new IllegalArgumentException("Raça inválida.");
+                        String raca = input.nextLine().trim();
+                        if (raca.isBlank()) {
+                            raca = NAO_INFORMADO;
+                        } else {
+                            Matcher matcherRaca = padraoRaca.matcher(raca);
+                            if (!matcherRaca.matches()) {
+                                throw new IllegalArgumentException("Raça inválida.");
+                            }
                         }
 
-                        Pet pet = new Pet(nomeCompleto, tipoPet, sexoDoPet, enderecoPet, idade, peso, raca);
+                        Pet pet = new Pet(nomeCompleto, tipoPet, sexoDoPet, enderecoPet, idadeSalva, pesoSalvo, raca);
 
                         try {
                             if (!pastaPetsCadastrados.exists()) {
@@ -132,8 +175,10 @@ public class MenuMain {
                         }
 
                         LocalDateTime dataAtual = LocalDateTime.now();
-                        String nomeArquivoFormatado = dataAtual.getYear() + "" + dataAtual.getMonthValue() + "" + dataAtual.getDayOfMonth() + "T" + dataAtual.getHour() + "" + dataAtual.getMinute() + "-" + nomeCompleto.replaceAll("\\s", "").toUpperCase();
-                        File petCadastrado = new File(pastaPetsCadastrados, nomeArquivoFormatado + ".txt");
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyMMdd'T'HHmm");
+                        String nomePetArquivo = nomeCompleto.replaceAll("\\s", "").toUpperCase();
+                        String nomeArquivoFormatado = dataAtual.format(formatter) + "-" + nomePetArquivo + ".txt";
+                        File petCadastrado = new File(pastaPetsCadastrados, nomeArquivoFormatado);
 
                         try {
                             if (!petCadastrado.exists()) {
@@ -142,6 +187,9 @@ public class MenuMain {
                         } catch (IOException e) {
                             System.out.println("Erro ao criar o arquivo.");
                         }
+
+                        String idadeFormatada = idadeSalva.equals(NAO_INFORMADO) ? NAO_INFORMADO : idadeSalva + " anos";
+                        String pesoFormatado = pesoSalvo.equals(NAO_INFORMADO) ? NAO_INFORMADO : pesoSalvo + "kg";
 
                         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(petCadastrado))) {
                             bufferedWriter.write("1 - " + nomeCompleto);
@@ -152,9 +200,9 @@ public class MenuMain {
                             bufferedWriter.newLine();
                             bufferedWriter.write("4 - " + enderecoPet.getRua() + ", " + enderecoPet.getNumeroCasa() + ", " + enderecoPet.getCidade());
                             bufferedWriter.newLine();
-                            bufferedWriter.write("5 - " + idade + " anos");
+                            bufferedWriter.write("5 - " + idadeFormatada + " anos");
                             bufferedWriter.newLine();
-                            bufferedWriter.write("6 - " + peso + "kg");
+                            bufferedWriter.write("6 - " + pesoFormatado + "kg");
                             bufferedWriter.newLine();
                             bufferedWriter.write("7 - " + raca);
                             bufferedWriter.newLine();

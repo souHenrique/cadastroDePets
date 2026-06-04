@@ -4,8 +4,10 @@ import enums.SexoDoPet;
 import enums.TipoPet;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,61 +16,88 @@ public class BuscarArquivo {
 
     private static final String NAO_INFORMADO = "NÃO INFORMADO";
 
-    public static List<Pet> buscarPets(String caminhoPastaPet, TipoPet tipoPet, String criterio, String valorBusca) {
-        List<Pet> resultados = new ArrayList<>();
-        List<Pet> pets = lerPetsDaPasta(caminhoPastaPet);
+    public static List<PetArquivo> buscarPets(String caminhoPastaPet, TipoPet tipoPet, String criterio, String valorBusca) {
+        List<PetArquivo> resultados = new ArrayList<>();
+        List<PetArquivo> registros = lerRegistrosDaPasta(caminhoPastaPet);
 
-        for (Pet pet : pets) {
+        for (PetArquivo registro : registros) {
+            Pet pet = registro.getPet();
             if (pet.getTipoPet() == tipoPet &&
                     BuscarCriterio.correspondeAoCriterio(pet, criterio, valorBusca)) {
-                resultados.add(pet);
+                resultados.add(registro);
             }
         }
 
         return resultados;
     }
 
-    public static List<Pet> buscarPets(String caminhoPastaPet, TipoPet tipoPet, String criterio1, String valorBusca1, String criterio2, String valorBusca2) {
-        List<Pet> resultados = new ArrayList<>();
-        List<Pet> pets = lerPetsDaPasta(caminhoPastaPet);
+    public static List<PetArquivo> buscarPets(String caminhoPastaPet, TipoPet tipoPet, String criterio1, String valorBusca1, String criterio2, String valorBusca2) {
+        List<PetArquivo> resultados = new ArrayList<>();
+        List<PetArquivo> registros = lerRegistrosDaPasta(caminhoPastaPet);
 
-        for (Pet pet : pets) {
+        for (PetArquivo registro : registros) {
+            Pet pet = registro.getPet();
             if (pet.getTipoPet() == tipoPet &&
                     BuscarCriterio.correspondeAoCriterio(pet, criterio1, valorBusca1) &&
                     BuscarCriterio.correspondeAoCriterio(pet, criterio2, valorBusca2)) {
-                resultados.add(pet);
+                resultados.add(registro);
             }
         }
 
         return resultados;
     }
 
-    private static List<Pet> lerPetsDaPasta(String caminhoPastaPet) {
-        List<Pet> pets = new ArrayList<>();
+    public static List<PetArquivo> listarTodosPets(String caminhoPastaPet) {
+        return lerRegistrosDaPasta(caminhoPastaPet);
+    }
+
+    public static void salvarPetNoArquivo(Pet pet, File arquivo) {
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(arquivo))) {
+            bufferedWriter.write("1 - " + pet.getNomeCompleto());
+            bufferedWriter.newLine();
+            bufferedWriter.write("2 - " + pet.getTipoPet());
+            bufferedWriter.newLine();
+            bufferedWriter.write("3 - " + pet.getSexoDoPet());
+            bufferedWriter.newLine();
+            bufferedWriter.write("4 - " + pet.getEndereco().getRua() + ", " + pet.getEndereco().getNumeroCasa() + ", " + pet.getEndereco().getCidade());
+            bufferedWriter.newLine();
+            bufferedWriter.write("5 - " + pet.getIdade());
+            bufferedWriter.newLine();
+            bufferedWriter.write("6 - " + pet.getPeso());
+            bufferedWriter.newLine();
+            bufferedWriter.write("7 - " + pet.getRaca());
+            bufferedWriter.newLine();
+        } catch (IOException e) {
+            throw new IllegalStateException("Erro ao escrever no arquivo.");
+        }
+    }
+
+    private static List<PetArquivo> lerRegistrosDaPasta(String caminhoPastaPet) {
+        List<PetArquivo> registros = new ArrayList<>();
         File pastaPet = new File(caminhoPastaPet);
 
         if (!pastaPet.exists() || !pastaPet.isDirectory()) {
-            return pets;
+            return registros;
         }
 
         File[] listaArquivosPet = pastaPet.listFiles((dir, name) ->
                 name.toUpperCase().endsWith(".TXT") || name.toLowerCase().endsWith(".txt"));
 
         if (listaArquivosPet == null) {
-            return pets;
+            return registros;
         }
 
         for (File arquivoPet : listaArquivosPet) {
-            Pet pet = lerPetDoArquivo(arquivoPet);
-            if (pet != null) {
-                pets.add(pet);
+            PetArquivo registro = lerRegistroDoArquivo(arquivoPet);
+            if (registro != null) {
+                registros.add(registro);
             }
         }
 
-        return pets;
+        return registros;
     }
 
-    private static Pet lerPetDoArquivo(File arquivo) {
+    private static PetArquivo lerRegistroDoArquivo(File arquivo) {
         List<String> linhas = new ArrayList<>();
 
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(arquivo))) {
@@ -100,14 +129,11 @@ public class BuscarArquivo {
         String peso = linhas.get(5);
         String raca = linhas.get(6);
 
-        return new Pet(nomeCompleto, tipoPet, sexoDoPet, endereco, idade, peso, raca);
+        Pet pet = new Pet(nomeCompleto, tipoPet, sexoDoPet, endereco, idade, peso, raca);
+        return new PetArquivo(pet, arquivo);
     }
 
     private static String removerPrefixo(String linha) {
         return linha.substring(4).trim();
-    }
-
-    public static List<Pet> listarTodosPets(String caminhoPastaPet) {
-        return lerPetsDaPasta(caminhoPastaPet);
     }
 }

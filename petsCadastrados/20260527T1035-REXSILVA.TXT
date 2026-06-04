@@ -1,7 +1,0 @@
-1 - Rex Silva
-2 - CACHORRO
-3 - MACHO
-4 - Rua A, 123, Sao Paulo
-5 - 2.0 anos
-6 - 10.0kg
-7 - Vira Lata

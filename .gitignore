@@ -1,6 +1,26 @@
-.idea
-.code
-.vscode
-.iml
-main.iml
-/out
+# IntelliJ / JetBrains
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+.code/
+
+# Build output
+out/
+build/
+target/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Runtime/generated project data
+petsCadastrados/
+
+# Optional: local env/config
+.env
+.env.*

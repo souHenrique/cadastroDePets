@@ -1,4 +1,4 @@
-package test;
+package app;
 
 import domain.*;
 import enums.SexoDoPet;
@@ -218,7 +218,32 @@ public class MenuMain {
                         System.out.println("teste");
                     }
                     else if (opc == 4) {
-                        System.out.println("teste");
+                        List<Pet> petsCadastrados = BuscarArquivo.listarTodosPets("petsCadastrados");
+
+                        if (petsCadastrados.isEmpty()) {
+                            System.out.println("Nenhum pet cadastrado.");
+                        } else {
+                            for (int i = 0; i < petsCadastrados.size(); i++) {
+                                Pet pet = petsCadastrados.get(i);
+
+                                System.out.println((i + 1) + ". " +
+                                        pet.getNomeCompleto() + " - " +
+                                        pet.getTipoPet() + " - " +
+                                        pet.getSexoDoPet() + " - " +
+                                        pet.getEndereco().getRua() + ", " +
+                                        pet.getEndereco().getNumeroCasa() + " - " +
+                                        pet.getEndereco().getCidade() + " - " +
+                                        pet.getIdade() + " - " +
+                                        pet.getPeso() + " - " +
+                                        pet.getRaca());
+                            }
+                        }
+
+                        if (petsCadastrados.isEmpty()) {
+                            System.out.println("Nenhum pet cadastrado.");
+                        } else {
+                            imprimirListaPets(petsCadastrados);
+                        }
                     }
                     else if (opc == 5) {
                         TipoPet tipoPet;
@@ -244,13 +269,17 @@ public class MenuMain {
                         System.out.print("Digite o primeiro critério: ");
                         String criterio1 = input.nextLine().trim();
 
+                        if (!criterioValido(criterio1)) {
+                            throw new IllegalArgumentException("Critério inválido.");
+                        }
+
                         System.out.print("Digite o valor do primeiro critério: ");
                         String valor1 = input.nextLine().trim();
 
                         List<Pet> resultados;
 
                         if (quantCriterios == 1) {
-                            resultados = buscarArquivo.buscarPets("petsCadastrados", tipoPet, criterio1, valor1);
+                            resultados = BuscarArquivo.buscarPets("petsCadastrados", tipoPet, criterio1, valor1);
                         } else {
                             System.out.print("Digite o segundo critério: ");
                             String criterio2 = input.nextLine().trim();
@@ -258,26 +287,21 @@ public class MenuMain {
                             System.out.print("Digite o valor do segundo critério: ");
                             String valor2 = input.nextLine().trim();
 
-                            resultados = buscarArquivo.buscarPets("petsCadastrados", tipoPet, criterio1, valor1, criterio2, valor2);
+                            if (!criterioValido(criterio2)) {
+                                throw new IllegalArgumentException("Critério inválido.");
+                            }
+
+                            if (criterio1.equalsIgnoreCase(criterio2)) {
+                                throw new IllegalArgumentException("Os critérios não podem ser iguais.");
+                            }
+
+                            resultados = BuscarArquivo.buscarPets("petsCadastrados", tipoPet, criterio1, valor1, criterio2, valor2);
                         }
 
                         if (resultados.isEmpty()) {
                             System.out.println("Nenhum resultado encontrado.");
                         } else {
-                            for (int i = 0; i < resultados.size(); i++) {
-                                Pet pet = resultados.get(i);
-
-                                System.out.println((i + 1) + ". " +
-                                        pet.getNomeCompleto() + " - " +
-                                        pet.getTipoPet() + " - " +
-                                        pet.getSexoDoPet() + " - " +
-                                        pet.getEndereco().getRua() + ", " +
-                                        pet.getEndereco().getNumeroCasa() + " - " +
-                                        pet.getEndereco().getCidade() + " - " +
-                                        pet.getIdade() + " - " +
-                                        pet.getPeso() + " - " +
-                                        pet.getRaca());
-                            }
+                            imprimirListaPets(resultados);
                         }
 
                         System.out.println("==============================================================");
@@ -288,6 +312,68 @@ public class MenuMain {
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
             }
+        }
+    }
+
+    private static boolean criterioValido(String criterio) {
+        String valor = criterio.toLowerCase().trim();
+        return valor.equals("nome") ||
+                valor.equals("sexo") ||
+                valor.equals("idade") ||
+                valor.equals("peso") ||
+                valor.equals("raca") ||
+                valor.equals("raça") ||
+                valor.equals("endereco") ||
+                valor.equals("endereço");
+    }
+
+    private static String formatarTextoExibicao(String texto) {
+        String textoMinusculo = texto.toLowerCase();
+        return Character.toUpperCase(textoMinusculo.charAt(0)) + textoMinusculo.substring(1);
+    }
+
+    private static String formatarIdade(String idade) {
+        if (idade.equals(NAO_INFORMADO)) {
+            return idade;
+        }
+
+        String valor = idade.replace(" anos", "").trim();
+
+        if (valor.endsWith(".0")) {
+            valor = valor.substring(0, valor.length() - 2);
+        }
+
+        return valor + " anos";
+    }
+
+    private static String formatarPeso(String peso) {
+        if (peso.equals(NAO_INFORMADO)) {
+            return peso;
+        }
+
+        String valor = peso.replace("kg", "").trim();
+
+        if (valor.endsWith(".0")) {
+            valor = valor.substring(0, valor.length() - 2);
+        }
+
+        return valor + "kg";
+    }
+
+    private static void imprimirListaPets(List<Pet> pets) {
+        for (int i = 0; i < pets.size(); i++) {
+            Pet pet = pets.get(i);
+
+            System.out.println((i + 1) + ". " +
+                    pet.getNomeCompleto() + " - " +
+                    pet.getTipoPet() + " - " +
+                    pet.getSexoDoPet() + " - " +
+                    pet.getEndereco().getRua() + ", " +
+                    pet.getEndereco().getNumeroCasa() + " - " +
+                    pet.getEndereco().getCidade() + " - " +
+                    pet.getIdade() + " - " +
+                    pet.getPeso() + " - " +
+                    pet.getRaca());
         }
     }
 }

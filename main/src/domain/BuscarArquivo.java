@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class buscarArquivo {
+public class BuscarArquivo {
 
     private static final String NAO_INFORMADO = "NÃO INFORMADO";
 
@@ -20,7 +20,7 @@ public class buscarArquivo {
 
         for (Pet pet : pets) {
             if (pet.getTipoPet() == tipoPet &&
-                    buscarCriterio.correspondeAoCriterio(pet, criterio, valorBusca)) {
+                    BuscarCriterio.correspondeAoCriterio(pet, criterio, valorBusca)) {
                 resultados.add(pet);
             }
         }
@@ -34,8 +34,8 @@ public class buscarArquivo {
 
         for (Pet pet : pets) {
             if (pet.getTipoPet() == tipoPet &&
-                    buscarCriterio.correspondeAoCriterio(pet, criterio1, valorBusca1) &&
-                    buscarCriterio.correspondeAoCriterio(pet, criterio2, valorBusca2)) {
+                    BuscarCriterio.correspondeAoCriterio(pet, criterio1, valorBusca1) &&
+                    BuscarCriterio.correspondeAoCriterio(pet, criterio2, valorBusca2)) {
                 resultados.add(pet);
             }
         }
@@ -105,5 +105,9 @@ public class buscarArquivo {
 
     private static String removerPrefixo(String linha) {
         return linha.substring(4).trim();
+    }
+
+    public static List<Pet> listarTodosPets(String caminhoPastaPet) {
+        return lerPetsDaPasta(caminhoPastaPet);
     }
 }

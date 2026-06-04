@@ -2,7 +2,7 @@ package domain;
 
 import java.text.Normalizer;
 
-public class buscarCriterio {
+public class BuscarCriterio {
 
     public static boolean correspondeAoCriterio(Pet pet, String criterio, String valorBuscado) {
         String criterioNormalizado = normalizar(criterio);

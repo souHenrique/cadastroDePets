@@ -72,7 +72,7 @@ public class MenuMain {
                 } else if (opc == 2) {
                     alterarPetCadastrado(input);
                 } else if (opc == 3) {
-                    System.out.println("teste");
+                    deletarPetCadastrado(input);
                 } else if (opc == 4) {
                     List<PetArquivo> petsCadastrados = BuscarArquivo.listarTodosPets("petsCadastrados");
 
@@ -486,6 +486,52 @@ public class MenuMain {
                     formatarIdade(pet.getIdade()) + " - " +
                     formatarPeso(pet.getPeso()) + " - " +
                     pet.getRaca());
+        }
+    }
+
+    private static void deletarPetCadastrado(Scanner input) {
+        while (true) {
+            List<PetArquivo> resultados = executarBusca(input);
+
+            if (resultados.isEmpty()) {
+                System.out.println("Nenhum resultado encontrado.");
+                return;
+            }
+
+            imprimirListaPets(resultados);
+            System.out.print("Digite o número do pet que deseja deletar: ");
+            String escolhaTexto = input.nextLine().trim();
+
+            if (!escolhaTexto.matches("\\d+")) {
+                System.out.println("Número inválido. A busca será exibida novamente.");
+                continue;
+            }
+
+            int escolha = Integer.parseInt(escolhaTexto);
+            if (escolha < 1 || escolha > resultados.size()) {
+                System.out.println("Número inválido. A busca será exibida novamente.");
+                continue;
+            }
+
+            PetArquivo selecionado = resultados.get(escolha - 1);
+
+            while (true) {
+                System.out.print("Confirma a exclusão do pet? Digite SIM ou NÃO: ");
+                String confirmacao = input.nextLine().trim();
+
+                if (confirmacao.equalsIgnoreCase("SIM")) {
+                    BuscarArquivo.deletarPetArquivo(selecionado.getArquivo());
+                    System.out.println("Pet deletado com sucesso.");
+                    return;
+                }
+
+                if (confirmacao.equalsIgnoreCase("NÃO") || confirmacao.equalsIgnoreCase("NAO")) {
+                    System.out.println("Exclusão cancelada.");
+                    return;
+                }
+
+                System.out.println("Resposta inválida. Digite SIM ou NÃO.");
+            }
         }
     }
 }

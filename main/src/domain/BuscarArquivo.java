@@ -72,6 +72,16 @@ public class BuscarArquivo {
         }
     }
 
+    public static void deletarPetArquivo(File arquivo) {
+        if (arquivo == null || !arquivo.exists()) {
+            throw new IllegalStateException("Arquivo do pet não encontrado.");
+        }
+
+        if (!arquivo.delete()) {
+            throw new IllegalStateException("Não foi possível deletar o pet.");
+        }
+    }
+
     private static List<PetArquivo> lerRegistrosDaPasta(String caminhoPastaPet) {
         List<PetArquivo> registros = new ArrayList<>();
         File pastaPet = new File(caminhoPastaPet);

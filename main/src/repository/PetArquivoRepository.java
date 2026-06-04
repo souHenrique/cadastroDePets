@@ -1,7 +1,12 @@
-package domain;
+package repository;
 
+import domain.BuscarCriterio;
+import domain.Endereco;
+import domain.Pet;
+import domain.PetArquivo;
 import enums.SexoDoPet;
 import enums.TipoPet;
+import util.Constantes;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -12,11 +17,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BuscarArquivo {
+public class PetArquivoRepository {
 
-    private static final String NAO_INFORMADO = "NÃO INFORMADO";
-
-    public static List<PetArquivo> buscarPets(String caminhoPastaPet, TipoPet tipoPet, String criterio, String valorBusca) {
+    public List<PetArquivo> buscarPets(String caminhoPastaPet, TipoPet tipoPet, String criterio, String valorBusca) {
         List<PetArquivo> resultados = new ArrayList<>();
         List<PetArquivo> registros = lerRegistrosDaPasta(caminhoPastaPet);
 
@@ -31,7 +34,7 @@ public class BuscarArquivo {
         return resultados;
     }
 
-    public static List<PetArquivo> buscarPets(String caminhoPastaPet, TipoPet tipoPet, String criterio1, String valorBusca1, String criterio2, String valorBusca2) {
+    public List<PetArquivo> buscarPets(String caminhoPastaPet, TipoPet tipoPet, String criterio1, String valorBusca1, String criterio2, String valorBusca2) {
         List<PetArquivo> resultados = new ArrayList<>();
         List<PetArquivo> registros = lerRegistrosDaPasta(caminhoPastaPet);
 
@@ -47,11 +50,11 @@ public class BuscarArquivo {
         return resultados;
     }
 
-    public static List<PetArquivo> listarTodosPets(String caminhoPastaPet) {
+    public List<PetArquivo> listarTodosPets(String caminhoPastaPet) {
         return lerRegistrosDaPasta(caminhoPastaPet);
     }
 
-    public static void salvarPetNoArquivo(Pet pet, File arquivo) {
+    public void salvarPetNoArquivo(Pet pet, File arquivo) {
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(arquivo))) {
             bufferedWriter.write("1 - " + pet.getNomeCompleto());
             bufferedWriter.newLine();
@@ -72,7 +75,7 @@ public class BuscarArquivo {
         }
     }
 
-    public static void deletarPetArquivo(File arquivo) {
+    public void deletarPetArquivo(File arquivo) {
         if (arquivo == null || !arquivo.exists()) {
             throw new IllegalStateException("Arquivo do pet não encontrado.");
         }
@@ -82,7 +85,7 @@ public class BuscarArquivo {
         }
     }
 
-    private static List<PetArquivo> lerRegistrosDaPasta(String caminhoPastaPet) {
+    private List<PetArquivo> lerRegistrosDaPasta(String caminhoPastaPet) {
         List<PetArquivo> registros = new ArrayList<>();
         File pastaPet = new File(caminhoPastaPet);
 
@@ -107,7 +110,7 @@ public class BuscarArquivo {
         return registros;
     }
 
-    private static PetArquivo lerRegistroDoArquivo(File arquivo) {
+    private PetArquivo lerRegistroDoArquivo(File arquivo) {
         List<String> linhas = new ArrayList<>();
 
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(arquivo))) {
@@ -129,9 +132,9 @@ public class BuscarArquivo {
         SexoDoPet sexoDoPet = SexoDoPet.valueOf(linhas.get(2).trim().toUpperCase());
 
         String[] partesEndereco = linhas.get(3).split(",");
-        String rua = partesEndereco.length > 0 ? partesEndereco[0].trim() : NAO_INFORMADO;
-        String numeroCasa = partesEndereco.length > 1 ? partesEndereco[1].trim() : NAO_INFORMADO;
-        String cidade = partesEndereco.length > 2 ? partesEndereco[2].trim() : NAO_INFORMADO;
+        String rua = partesEndereco.length > 0 ? partesEndereco[0].trim() : Constantes.NAO_INFORMADO;
+        String numeroCasa = partesEndereco.length > 1 ? partesEndereco[1].trim() : Constantes.NAO_INFORMADO;
+        String cidade = partesEndereco.length > 2 ? partesEndereco[2].trim() : Constantes.NAO_INFORMADO;
 
         Endereco endereco = new Endereco(numeroCasa, cidade, rua);
 
@@ -143,7 +146,7 @@ public class BuscarArquivo {
         return new PetArquivo(pet, arquivo);
     }
 
-    private static String removerPrefixo(String linha) {
+    private String removerPrefixo(String linha) {
         return linha.substring(4).trim();
     }
 }

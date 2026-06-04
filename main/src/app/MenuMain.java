@@ -1,36 +1,29 @@
 package app;
 
-import domain.BuscarArquivo;
 import domain.Endereco;
 import domain.Pet;
 import domain.PetArquivo;
 import enums.SexoDoPet;
 import enums.TipoPet;
+import repository.FormularioRepository;
+import repository.PetArquivoRepository;
+import util.Constantes;
+import util.Formatador;
+import util.Validador;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 
 public class MenuMain {
 
-    private static final String NAO_INFORMADO = "NÃO INFORMADO";
-    private static final Pattern PADRAO_NOME = Pattern.compile("^[a-zA-Z]+(\\s[a-zA-Z]+)+$");
-    private static final Pattern PADRAO_IDADE_E_PESO = Pattern.compile("^\\d+([,.]\\d+)?$");
-    private static final Pattern PADRAO_RACA = Pattern.compile("^[a-zA-Z\\s]+$");
+    private static final FormularioRepository FORMULARIO_REPOSITORY = new FormularioRepository();
+    private static final PetArquivoRepository PET_ARQUIVO_REPOSITORY = new PetArquivoRepository();
 
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
-        List<String> listaPerguntas = new ArrayList<>();
 
-        File nomeFormulario = new File("formulario.txt");
-        File pastaPetsCadastrados = new File("petsCadastrados");
+        File pastaPetsCadastrados = new File(Constantes.CAMINHO_PASTA_PETS);
 
         System.out.println("==================================================================================");
         System.out.println("                                  PET SHOP");
@@ -58,23 +51,21 @@ public class MenuMain {
                     System.out.println("O programa foi encerrado...");
                     break;
                 } else if (opc == 1) {
-                    listaPerguntas.clear();
-                    carregarPerguntas(nomeFormulario, listaPerguntas);
-
+                    List<String> listaPerguntas = FORMULARIO_REPOSITORY.carregarPerguntas();
                     Pet pet = cadastrarNovoPet(input, listaPerguntas);
 
                     if (!pastaPetsCadastrados.exists() && !pastaPetsCadastrados.mkdirs()) {
                         throw new IllegalStateException("Erro ao criar a pasta.");
                     }
 
-                    File petCadastrado = new File(pastaPetsCadastrados, gerarNomeArquivo(pet.getNomeCompleto()));
-                    BuscarArquivo.salvarPetNoArquivo(pet, petCadastrado);
+                    File petCadastrado = new File(pastaPetsCadastrados, Formatador.gerarNomeArquivo(pet.getNomeCompleto()));
+                    PET_ARQUIVO_REPOSITORY.salvarPetNoArquivo(pet, petCadastrado);
                 } else if (opc == 2) {
                     alterarPetCadastrado(input);
                 } else if (opc == 3) {
                     deletarPetCadastrado(input);
                 } else if (opc == 4) {
-                    List<PetArquivo> petsCadastrados = BuscarArquivo.listarTodosPets("petsCadastrados");
+                    List<PetArquivo> petsCadastrados = PET_ARQUIVO_REPOSITORY.listarTodosPets(Constantes.CAMINHO_PASTA_PETS);
 
                     if (petsCadastrados.isEmpty()) {
                         System.out.println("Nenhum pet cadastrado.");
@@ -95,17 +86,6 @@ public class MenuMain {
             } catch (IllegalArgumentException | IllegalStateException e) {
                 System.out.println(e.getMessage());
             }
-        }
-    }
-
-    private static void carregarPerguntas(File nomeFormulario, List<String> listaPerguntas) {
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(nomeFormulario))) {
-            String linha;
-            while ((linha = bufferedReader.readLine()) != null) {
-                listaPerguntas.add(linha);
-            }
-        } catch (IOException e) {
-            throw new IllegalStateException("Erro ao ler o formulário.");
         }
     }
 
@@ -160,7 +140,7 @@ public class MenuMain {
 
             PetArquivo selecionado = resultados.get(escolha - 1);
             Pet petAtualizado = lerDadosAlterados(input, selecionado.getPet());
-            BuscarArquivo.salvarPetNoArquivo(petAtualizado, selecionado.getArquivo());
+            PET_ARQUIVO_REPOSITORY.salvarPetNoArquivo(petAtualizado, selecionado.getArquivo());
             System.out.println("Pet alterado com sucesso.");
             return;
         }
@@ -183,7 +163,7 @@ public class MenuMain {
         System.out.print("Digite o primeiro critério: ");
         String criterio1 = input.nextLine().trim();
 
-        if (!criterioValido(criterio1)) {
+        if (!Validador.criterioValido(criterio1)) {
             throw new IllegalArgumentException("Critério inválido.");
         }
 
@@ -191,12 +171,12 @@ public class MenuMain {
         String valor1 = input.nextLine().trim();
 
         if (quantCriterios == 1) {
-            return BuscarArquivo.buscarPets("petsCadastrados", tipoPet, criterio1, valor1);
+            return PET_ARQUIVO_REPOSITORY.buscarPets(Constantes.CAMINHO_PASTA_PETS, tipoPet, criterio1, valor1);
         }
 
         System.out.print("Digite o segundo critério: ");
         String criterio2 = input.nextLine().trim();
-        if (!criterioValido(criterio2)) {
+        if (!Validador.criterioValido(criterio2)) {
             throw new IllegalArgumentException("Critério inválido.");
         }
 
@@ -207,7 +187,7 @@ public class MenuMain {
         System.out.print("Digite o valor do segundo critério: ");
         String valor2 = input.nextLine().trim();
 
-        return BuscarArquivo.buscarPets("petsCadastrados", tipoPet, criterio1, valor1, criterio2, valor2);
+        return PET_ARQUIVO_REPOSITORY.buscarPets(Constantes.CAMINHO_PASTA_PETS, tipoPet, criterio1, valor1, criterio2, valor2);
     }
 
     private static Pet lerDadosAlterados(Scanner input, Pet petAtual) {
@@ -255,31 +235,11 @@ public class MenuMain {
     }
 
     private static String lerNomeObrigatorio(Scanner input) {
-        String nomeCompleto = input.nextLine().trim();
-
-        if (nomeCompleto.isBlank()) {
-            throw new IllegalArgumentException("O pet deve ter um nome e sobrenome.");
-        }
-
-        if (!PADRAO_NOME.matcher(nomeCompleto).matches()) {
-            throw new IllegalArgumentException("Nome inválido, tente novamente.");
-        }
-
-        return nomeCompleto;
+        return Validador.validarNomeObrigatorio(input.nextLine());
     }
 
     private static String lerNomeAlterado(Scanner input, String valorAtual) {
-        String nomeCompleto = input.nextLine().trim();
-
-        if (nomeCompleto.isBlank()) {
-            return valorAtual;
-        }
-
-        if (!PADRAO_NOME.matcher(nomeCompleto).matches()) {
-            throw new IllegalArgumentException("Nome inválido, tente novamente.");
-        }
-
-        return nomeCompleto;
+        return Validador.validarNomeAlterado(input.nextLine(), valorAtual);
     }
 
     private static TipoPet lerTipoPet(Scanner input) {
@@ -304,19 +264,19 @@ public class MenuMain {
         System.out.print("Número da casa: ");
         String numeroCasa = input.nextLine().trim();
         if (numeroCasa.isBlank()) {
-            numeroCasa = NAO_INFORMADO;
+            numeroCasa = Constantes.NAO_INFORMADO;
         }
 
         System.out.print("Cidade: ");
         String cidade = input.nextLine().trim();
         if (cidade.isBlank()) {
-            cidade = NAO_INFORMADO;
+            cidade = Constantes.NAO_INFORMADO;
         }
 
         System.out.print("Rua: ");
         String rua = input.nextLine().trim();
         if (rua.isBlank()) {
-            rua = NAO_INFORMADO;
+            rua = Constantes.NAO_INFORMADO;
         }
 
         return new Endereco(numeroCasa, cidade, rua);
@@ -325,10 +285,10 @@ public class MenuMain {
     private static String lerIdadeNova(Scanner input) {
         String idadeTexto = input.nextLine().trim();
         if (idadeTexto.isBlank()) {
-            return NAO_INFORMADO;
+            return Constantes.NAO_INFORMADO;
         }
 
-        return validarEFormatarIdade(idadeTexto);
+        return Formatador.formatarIdadePersistencia(Validador.validarValorIdade(idadeTexto));
     }
 
     private static String lerIdadeAlterada(Scanner input, String valorAtual) {
@@ -337,31 +297,16 @@ public class MenuMain {
             return valorAtual;
         }
 
-        return validarEFormatarIdade(idadeTexto);
-    }
-
-    private static String validarEFormatarIdade(String idadeTexto) {
-        idadeTexto = idadeTexto.replace(" anos", "").replace(",", ".").trim();
-
-        if (!PADRAO_IDADE_E_PESO.matcher(idadeTexto).matches()) {
-            throw new IllegalArgumentException("Idade inválida. Digite apenas números.");
-        }
-
-        double idadeValor = Double.parseDouble(idadeTexto);
-        if (idadeValor > 20) {
-            throw new IllegalArgumentException("Idade inválida. O pet não pode ter mais de 20 anos.");
-        }
-
-        return idadeValor + " anos";
+        return Formatador.formatarIdadePersistencia(Validador.validarValorIdade(idadeTexto));
     }
 
     private static String lerPesoNovo(Scanner input) {
         String pesoTexto = input.nextLine().trim();
         if (pesoTexto.isBlank()) {
-            return NAO_INFORMADO;
+            return Constantes.NAO_INFORMADO;
         }
 
-        return validarEFormatarPeso(pesoTexto);
+        return Formatador.formatarPesoPersistencia(Validador.validarValorPeso(pesoTexto));
     }
 
     private static String lerPesoAlterado(Scanner input, String valorAtual) {
@@ -370,106 +315,15 @@ public class MenuMain {
             return valorAtual;
         }
 
-        return validarEFormatarPeso(pesoTexto);
-    }
-
-    private static String validarEFormatarPeso(String pesoTexto) {
-        pesoTexto = pesoTexto.replace("kg", "").replace(",", ".").trim();
-
-        if (!PADRAO_IDADE_E_PESO.matcher(pesoTexto).matches()) {
-            throw new IllegalArgumentException("Peso inválido. Digite apenas números.");
-        }
-
-        double pesoValor = Double.parseDouble(pesoTexto);
-        if (pesoValor > 60 || pesoValor < 0.5) {
-            throw new IllegalArgumentException("Peso inválido. O peso deve estar entre 0.5kg e 60kg.");
-        }
-
-        return pesoValor + "kg";
+        return Formatador.formatarPesoPersistencia(Validador.validarValorPeso(pesoTexto));
     }
 
     private static String lerRacaNova(Scanner input) {
-        String raca = input.nextLine().trim();
-        if (raca.isBlank()) {
-            return NAO_INFORMADO;
-        }
-
-        if (!PADRAO_RACA.matcher(raca).matches()) {
-            throw new IllegalArgumentException("Raça inválida.");
-        }
-
-        return raca;
+        return Validador.validarRacaNova(input.nextLine());
     }
 
     private static String lerRacaAlterada(Scanner input, String valorAtual) {
-        String raca = input.nextLine().trim();
-        if (raca.isBlank()) {
-            return valorAtual;
-        }
-
-        if (!PADRAO_RACA.matcher(raca).matches()) {
-            throw new IllegalArgumentException("Raça inválida.");
-        }
-
-        return raca;
-    }
-
-    private static String lerCampoMantendoAtual(Scanner input, String valorAtual) {
-        String valor = input.nextLine().trim();
-        if (valor.isBlank()) {
-            return valorAtual;
-        }
-        return valor;
-    }
-
-    private static String gerarNomeArquivo(String nomeCompleto) {
-        LocalDateTime dataAtual = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmm");
-        String nomePetArquivo = nomeCompleto.replaceAll("\\s", "").toUpperCase();
-        return dataAtual.format(formatter) + "-" + nomePetArquivo + ".TXT";
-    }
-
-    private static boolean criterioValido(String criterio) {
-        String valor = criterio.toLowerCase().trim();
-        return valor.equals("nome") ||
-                valor.equals("sexo") ||
-                valor.equals("idade") ||
-                valor.equals("peso") ||
-                valor.equals("raca") ||
-                valor.equals("raça") ||
-                valor.equals("endereco") ||
-                valor.equals("endereço");
-    }
-
-    private static String formatarTextoExibicao(String texto) {
-        String textoMinusculo = texto.toLowerCase();
-        return Character.toUpperCase(textoMinusculo.charAt(0)) + textoMinusculo.substring(1);
-    }
-
-    private static String formatarIdade(String idade) {
-        if (idade.equals(NAO_INFORMADO)) {
-            return idade;
-        }
-
-        String valor = idade.replace(" anos", "").trim();
-        if (valor.endsWith(".0")) {
-            valor = valor.substring(0, valor.length() - 2);
-        }
-
-        return valor + " anos";
-    }
-
-    private static String formatarPeso(String peso) {
-        if (peso.equals(NAO_INFORMADO)) {
-            return peso;
-        }
-
-        String valor = peso.replace("kg", "").trim();
-        if (valor.endsWith(".0")) {
-            valor = valor.substring(0, valor.length() - 2);
-        }
-
-        return valor + "kg";
+        return Validador.validarRacaAlterada(input.nextLine(), valorAtual);
     }
 
     private static void imprimirListaPets(List<PetArquivo> registros) {
@@ -478,13 +332,13 @@ public class MenuMain {
 
             System.out.println((i + 1) + ". " +
                     pet.getNomeCompleto() + " - " +
-                    formatarTextoExibicao(pet.getTipoPet().name()) + " - " +
-                    formatarTextoExibicao(pet.getSexoDoPet().name()) + " - " +
+                    Formatador.formatarTextoExibicao(pet.getTipoPet().name()) + " - " +
+                    Formatador.formatarTextoExibicao(pet.getSexoDoPet().name()) + " - " +
                     pet.getEndereco().getRua() + ", " +
                     pet.getEndereco().getNumeroCasa() + " - " +
                     pet.getEndereco().getCidade() + " - " +
-                    formatarIdade(pet.getIdade()) + " - " +
-                    formatarPeso(pet.getPeso()) + " - " +
+                    Formatador.formatarIdadeExibicao(pet.getIdade()) + " - " +
+                    Formatador.formatarPesoExibicao(pet.getPeso()) + " - " +
                     pet.getRaca());
         }
     }
@@ -520,7 +374,7 @@ public class MenuMain {
                 String confirmacao = input.nextLine().trim();
 
                 if (confirmacao.equalsIgnoreCase("SIM")) {
-                    BuscarArquivo.deletarPetArquivo(selecionado.getArquivo());
+                    PET_ARQUIVO_REPOSITORY.deletarPetArquivo(selecionado.getArquivo());
                     System.out.println("Pet deletado com sucesso.");
                     return;
                 }
@@ -533,5 +387,13 @@ public class MenuMain {
                 System.out.println("Resposta inválida. Digite SIM ou NÃO.");
             }
         }
+    }
+
+    private static String lerCampoMantendoAtual(Scanner input, String valorAtual) {
+        String valor = input.nextLine().trim();
+        if (valor.isBlank()) {
+            return valorAtual;
+        }
+        return valor;
     }
 }

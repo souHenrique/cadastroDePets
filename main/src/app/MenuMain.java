@@ -7,11 +7,12 @@ import enums.SexoDoPet;
 import enums.TipoPet;
 import repository.FormularioRepository;
 import repository.PetArquivoRepository;
+import service.BuscaPetService;
+import service.PetService;
 import util.Constantes;
 import util.Formatador;
 import util.Validador;
 
-import java.io.File;
 import java.util.List;
 import java.util.Scanner;
 
@@ -19,11 +20,11 @@ public class MenuMain {
 
     private static final FormularioRepository FORMULARIO_REPOSITORY = new FormularioRepository();
     private static final PetArquivoRepository PET_ARQUIVO_REPOSITORY = new PetArquivoRepository();
+    private static final BuscaPetService BUSCA_PET_SERVICE = new BuscaPetService(PET_ARQUIVO_REPOSITORY);
+    private static final PetService PET_SERVICE = new PetService(PET_ARQUIVO_REPOSITORY);
 
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
-
-        File pastaPetsCadastrados = new File(Constantes.CAMINHO_PASTA_PETS);
 
         System.out.println("==================================================================================");
         System.out.println("                                  PET SHOP");
@@ -53,40 +54,42 @@ public class MenuMain {
                 } else if (opc == 1) {
                     List<String> listaPerguntas = FORMULARIO_REPOSITORY.carregarPerguntas();
                     Pet pet = cadastrarNovoPet(input, listaPerguntas);
-
-                    if (!pastaPetsCadastrados.exists() && !pastaPetsCadastrados.mkdirs()) {
-                        throw new IllegalStateException("Erro ao criar a pasta.");
-                    }
-
-                    File petCadastrado = new File(pastaPetsCadastrados, Formatador.gerarNomeArquivo(pet.getNomeCompleto()));
-                    PET_ARQUIVO_REPOSITORY.salvarPetNoArquivo(pet, petCadastrado);
+                    PET_SERVICE.salvarNovoPet(pet);
                 } else if (opc == 2) {
                     alterarPetCadastrado(input);
                 } else if (opc == 3) {
                     deletarPetCadastrado(input);
                 } else if (opc == 4) {
-                    List<PetArquivo> petsCadastrados = PET_ARQUIVO_REPOSITORY.listarTodosPets(Constantes.CAMINHO_PASTA_PETS);
-
-                    if (petsCadastrados.isEmpty()) {
-                        System.out.println("Nenhum pet cadastrado.");
-                    } else {
-                        imprimirListaPets(petsCadastrados);
-                    }
+                    listarTodosPets();
                 } else if (opc == 5) {
-                    List<PetArquivo> resultados = executarBusca(input);
-
-                    if (resultados.isEmpty()) {
-                        System.out.println("Nenhum resultado encontrado.");
-                    } else {
-                        imprimirListaPets(resultados);
-                    }
-
-                    System.out.println("==============================================================");
+                    buscarPets(input);
                 }
             } catch (IllegalArgumentException | IllegalStateException e) {
                 System.out.println(e.getMessage());
             }
         }
+    }
+
+    private static void listarTodosPets() {
+        List<PetArquivo> petsCadastrados = BUSCA_PET_SERVICE.listarTodosPets();
+
+        if (petsCadastrados.isEmpty()) {
+            System.out.println("Nenhum pet cadastrado.");
+        } else {
+            imprimirListaPets(petsCadastrados);
+        }
+    }
+
+    private static void buscarPets(Scanner input) {
+        List<PetArquivo> resultados = executarBusca(input);
+
+        if (resultados.isEmpty()) {
+            System.out.println("Nenhum resultado encontrado.");
+        } else {
+            imprimirListaPets(resultados);
+        }
+
+        System.out.println("==============================================================");
     }
 
     private static Pet cadastrarNovoPet(Scanner input, List<String> listaPerguntas) {
@@ -127,22 +130,55 @@ public class MenuMain {
             System.out.print("Digite o número do pet que deseja alterar: ");
             String escolhaTexto = input.nextLine().trim();
 
-            if (!escolhaTexto.matches("\\d+")) {
-                System.out.println("Número inválido. A busca será exibida novamente.");
+            try {
+                PetArquivo selecionado = PET_SERVICE.selecionarPet(resultados, escolhaTexto);
+                Pet petAtualizado = lerDadosAlterados(input, selecionado.getPet());
+                PET_SERVICE.alterarPet(selecionado, petAtualizado);
+                System.out.println("Pet alterado com sucesso.");
+                return;
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    private static void deletarPetCadastrado(Scanner input) {
+        while (true) {
+            List<PetArquivo> resultados = executarBusca(input);
+
+            if (resultados.isEmpty()) {
+                System.out.println("Nenhum resultado encontrado.");
+                return;
+            }
+
+            imprimirListaPets(resultados);
+            System.out.print("Digite o número do pet que deseja deletar: ");
+            String escolhaTexto = input.nextLine().trim();
+
+            PetArquivo selecionado;
+            try {
+                selecionado = PET_SERVICE.selecionarPet(resultados, escolhaTexto);
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
                 continue;
             }
 
-            int escolha = Integer.parseInt(escolhaTexto);
-            if (escolha < 1 || escolha > resultados.size()) {
-                System.out.println("Número inválido. A busca será exibida novamente.");
-                continue;
-            }
+            while (true) {
+                System.out.print("Confirma a exclusão do pet? Digite SIM ou NÃO: ");
+                String confirmacao = input.nextLine().trim();
 
-            PetArquivo selecionado = resultados.get(escolha - 1);
-            Pet petAtualizado = lerDadosAlterados(input, selecionado.getPet());
-            PET_ARQUIVO_REPOSITORY.salvarPetNoArquivo(petAtualizado, selecionado.getArquivo());
-            System.out.println("Pet alterado com sucesso.");
-            return;
+                try {
+                    boolean petDeletado = PET_SERVICE.deletarPet(selecionado, confirmacao);
+                    if (petDeletado) {
+                        System.out.println("Pet deletado com sucesso.");
+                    } else {
+                        System.out.println("Exclusão cancelada.");
+                    }
+                    return;
+                } catch (IllegalArgumentException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
         }
     }
 
@@ -153,41 +189,24 @@ public class MenuMain {
         System.out.println("Você deseja utilizar 1 ou 2 critérios de busca? ");
         String quantidadeTexto = input.nextLine().trim();
 
-        if (!quantidadeTexto.matches("[12]")) {
-            throw new IllegalArgumentException("Digite apenas 1 ou 2.");
-        }
-
-        int quantCriterios = Integer.parseInt(quantidadeTexto);
-
         System.out.println("Critérios disponíveis: nome, sexo, idade, peso, raca, endereco");
         System.out.print("Digite o primeiro critério: ");
         String criterio1 = input.nextLine().trim();
 
-        if (!Validador.criterioValido(criterio1)) {
-            throw new IllegalArgumentException("Critério inválido.");
-        }
-
         System.out.print("Digite o valor do primeiro critério: ");
         String valor1 = input.nextLine().trim();
 
-        if (quantCriterios == 1) {
-            return PET_ARQUIVO_REPOSITORY.buscarPets(Constantes.CAMINHO_PASTA_PETS, tipoPet, criterio1, valor1);
+        if ("2".equals(quantidadeTexto)) {
+            System.out.print("Digite o segundo critério: ");
+            String criterio2 = input.nextLine().trim();
+
+            System.out.print("Digite o valor do segundo critério: ");
+            String valor2 = input.nextLine().trim();
+
+            return BUSCA_PET_SERVICE.buscarPets(tipoPet, quantidadeTexto, criterio1, valor1, criterio2, valor2);
         }
 
-        System.out.print("Digite o segundo critério: ");
-        String criterio2 = input.nextLine().trim();
-        if (!Validador.criterioValido(criterio2)) {
-            throw new IllegalArgumentException("Critério inválido.");
-        }
-
-        if (criterio1.equalsIgnoreCase(criterio2)) {
-            throw new IllegalArgumentException("Os critérios não podem ser iguais.");
-        }
-
-        System.out.print("Digite o valor do segundo critério: ");
-        String valor2 = input.nextLine().trim();
-
-        return PET_ARQUIVO_REPOSITORY.buscarPets(Constantes.CAMINHO_PASTA_PETS, tipoPet, criterio1, valor1, criterio2, valor2);
+        return BUSCA_PET_SERVICE.buscarPets(tipoPet, quantidadeTexto, criterio1, valor1, null, null);
     }
 
     private static Pet lerDadosAlterados(Scanner input, Pet petAtual) {
@@ -326,6 +345,14 @@ public class MenuMain {
         return Validador.validarRacaAlterada(input.nextLine(), valorAtual);
     }
 
+    private static String lerCampoMantendoAtual(Scanner input, String valorAtual) {
+        String valor = input.nextLine().trim();
+        if (valor.isBlank()) {
+            return valorAtual;
+        }
+        return valor;
+    }
+
     private static void imprimirListaPets(List<PetArquivo> registros) {
         for (int i = 0; i < registros.size(); i++) {
             Pet pet = registros.get(i).getPet();
@@ -341,59 +368,5 @@ public class MenuMain {
                     Formatador.formatarPesoExibicao(pet.getPeso()) + " - " +
                     pet.getRaca());
         }
-    }
-
-    private static void deletarPetCadastrado(Scanner input) {
-        while (true) {
-            List<PetArquivo> resultados = executarBusca(input);
-
-            if (resultados.isEmpty()) {
-                System.out.println("Nenhum resultado encontrado.");
-                return;
-            }
-
-            imprimirListaPets(resultados);
-            System.out.print("Digite o número do pet que deseja deletar: ");
-            String escolhaTexto = input.nextLine().trim();
-
-            if (!escolhaTexto.matches("\\d+")) {
-                System.out.println("Número inválido. A busca será exibida novamente.");
-                continue;
-            }
-
-            int escolha = Integer.parseInt(escolhaTexto);
-            if (escolha < 1 || escolha > resultados.size()) {
-                System.out.println("Número inválido. A busca será exibida novamente.");
-                continue;
-            }
-
-            PetArquivo selecionado = resultados.get(escolha - 1);
-
-            while (true) {
-                System.out.print("Confirma a exclusão do pet? Digite SIM ou NÃO: ");
-                String confirmacao = input.nextLine().trim();
-
-                if (confirmacao.equalsIgnoreCase("SIM")) {
-                    PET_ARQUIVO_REPOSITORY.deletarPetArquivo(selecionado.getArquivo());
-                    System.out.println("Pet deletado com sucesso.");
-                    return;
-                }
-
-                if (confirmacao.equalsIgnoreCase("NÃO") || confirmacao.equalsIgnoreCase("NAO")) {
-                    System.out.println("Exclusão cancelada.");
-                    return;
-                }
-
-                System.out.println("Resposta inválida. Digite SIM ou NÃO.");
-            }
-        }
-    }
-
-    private static String lerCampoMantendoAtual(Scanner input, String valorAtual) {
-        String valor = input.nextLine().trim();
-        if (valor.isBlank()) {
-            return valorAtual;
-        }
-        return valor;
     }
 }

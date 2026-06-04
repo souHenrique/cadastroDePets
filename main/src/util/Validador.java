@@ -65,7 +65,7 @@ public final class Validador {
         return valor;
     }
 
-    public static double validarValorIdade(String idadeTexto) {
+    public static double validarValorIdadeEmAnos(String idadeTexto) {
         String valorNormalizado = idadeTexto.replace(" anos", "").replace(",", ".").trim();
 
         if (!PADRAO_IDADE_E_PESO.matcher(valorNormalizado).matches()) {
@@ -78,6 +78,23 @@ public final class Validador {
         }
 
         return idadeValor;
+    }
+
+    public static double validarValorIdadeEmMeses(String idadeTexto) {
+        String valorNormalizado = idadeTexto.replace(",", ".").trim();
+
+        if (!PADRAO_IDADE_E_PESO.matcher(valorNormalizado).matches()) {
+            throw new IllegalArgumentException("Idade inválida. Digite apenas números.");
+        }
+
+        double idadeMeses = Double.parseDouble(valorNormalizado);
+        double idadeEmAnos = idadeMeses / 12.0;
+
+        if (idadeEmAnos > 20) {
+            throw new IllegalArgumentException("Idade inválida. O pet não pode ter mais de 20 anos.");
+        }
+
+        return idadeEmAnos;
     }
 
     public static double validarValorPeso(String pesoTexto) {

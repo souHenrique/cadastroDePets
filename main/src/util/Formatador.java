@@ -2,6 +2,7 @@ package util;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public final class Formatador {
 
@@ -26,11 +27,7 @@ public final class Formatador {
         }
 
         String valor = idade.replace(" anos", "").trim();
-        if (valor.endsWith(".0")) {
-            valor = valor.substring(0, valor.length() - 2);
-        }
-
-        return valor + " anos";
+        return formatarNumeroSemZeros(valor) + " anos";
     }
 
     public static String formatarPesoExibicao(String peso) {
@@ -39,18 +36,26 @@ public final class Formatador {
         }
 
         String valor = peso.replace("kg", "").trim();
-        if (valor.endsWith(".0")) {
-            valor = valor.substring(0, valor.length() - 2);
-        }
-
-        return valor + "kg";
+        return formatarNumeroSemZeros(valor) + "kg";
     }
 
     public static String formatarIdadePersistencia(double idadeValor) {
-        return idadeValor + " anos";
+        return formatarNumeroSemZeros(idadeValor) + " anos";
     }
 
     public static String formatarPesoPersistencia(double pesoValor) {
-        return pesoValor + "kg";
+        return formatarNumeroSemZeros(pesoValor) + "kg";
+    }
+
+    public static String formatarNumeroSemZeros(double valor) {
+        return formatarNumeroSemZeros(Double.toString(valor));
+    }
+
+    public static String formatarNumeroSemZeros(String valorTexto) {
+        double valor = Double.parseDouble(valorTexto.trim().replace(",", "."));
+        if (valor == Math.rint(valor)) {
+            return String.format(Locale.US, "%.0f", valor);
+        }
+        return Double.toString(valor);
     }
 }

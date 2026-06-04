@@ -443,7 +443,7 @@ public class MenuMain {
             return Constantes.NAO_INFORMADO;
         }
 
-        return Formatador.formatarIdadePersistencia(Validador.validarValorIdade(idadeTexto));
+        return Formatador.formatarIdadePersistencia(lerValorIdadeEmAnos(input, idadeTexto));
     }
 
     private static String lerIdadeAlterada(Scanner input, String valorAtual) {
@@ -452,7 +452,7 @@ public class MenuMain {
             return valorAtual;
         }
 
-        return Formatador.formatarIdadePersistencia(Validador.validarValorIdade(idadeTexto));
+        return Formatador.formatarIdadePersistencia(lerValorIdadeEmAnos(input, idadeTexto));
     }
 
     private static String lerPesoNovo(Scanner input) {
@@ -487,6 +487,23 @@ public class MenuMain {
             return valorAtual;
         }
         return valor;
+    }
+
+    private static double lerValorIdadeEmAnos(Scanner input, String idadeTexto) {
+        while (true) {
+            System.out.print("Digite a unidade da idade (1 para anos, 2 para meses): ");
+            String unidade = input.nextLine().trim();
+
+            if ("1".equals(unidade)) {
+                return Validador.validarValorIdadeEmAnos(idadeTexto);
+            }
+
+            if ("2".equals(unidade)) {
+                return Validador.validarValorIdadeEmMeses(idadeTexto);
+            }
+
+            System.out.println("Unidade inválida. Digite 1 para anos ou 2 para meses.");
+        }
     }
 
     private static void imprimirListaPets(List<PetArquivo> registros) {

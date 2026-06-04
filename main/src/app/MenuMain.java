@@ -8,11 +8,13 @@ import enums.TipoPet;
 import repository.FormularioRepository;
 import repository.PetArquivoRepository;
 import service.BuscaPetService;
+import service.FormularioService;
 import service.PetService;
 import util.Constantes;
 import util.Formatador;
 import util.Validador;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -22,6 +24,7 @@ public class MenuMain {
     private static final PetArquivoRepository PET_ARQUIVO_REPOSITORY = new PetArquivoRepository();
     private static final BuscaPetService BUSCA_PET_SERVICE = new BuscaPetService(PET_ARQUIVO_REPOSITORY);
     private static final PetService PET_SERVICE = new PetService(PET_ARQUIVO_REPOSITORY);
+    private static final FormularioService FORMULARIO_SERVICE = new FormularioService(FORMULARIO_REPOSITORY);
 
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
@@ -32,14 +35,40 @@ public class MenuMain {
         while (true) {
             try {
                 System.out.println("==================================================================================");
+                System.out.print("1. Iniciar o sistema para cadastro de PETS\n" +
+                        "2. Iniciar o sistema para alterar formulário\n" +
+                        "3. Sair\n" +
+                        "Selecione a sua opção: ");
+                String opcao = input.nextLine().trim();
+
+                if ("1".equals(opcao)) {
+                    iniciarSistemaPets(input);
+                } else if ("2".equals(opcao)) {
+                    iniciarSistemaFormulario(input);
+                } else if ("3".equals(opcao)) {
+                    System.out.println("O programa foi encerrado...");
+                    return;
+                } else {
+                    System.out.println("Opção inválida, tente novamente...");
+                }
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    private static void iniciarSistemaPets(Scanner input) {
+        while (true) {
+            try {
+                System.out.println("==================================================================================");
                 System.out.print("1. Cadastrar um novo pet\n" +
                         "2. Alterar os dados do pet cadastrado\n" +
                         "3. Deletar um pet cadastrado\n" +
                         "4. Listar todos os pets cadastrados\n" +
                         "5. Listar pets por algum critério (idade, nome, raça)\n" +
-                        "6. Sair\n" +
+                        "6. Voltar\n" +
                         "Selecione a sua opção: ");
-                String opcao = input.nextLine();
+                String opcao = input.nextLine().trim();
 
                 if (!opcao.matches("[1-6]")) {
                     System.out.println("Opção inválida, tente novamente...");
@@ -49,10 +78,9 @@ public class MenuMain {
                 int opc = Integer.parseInt(opcao);
 
                 if (opc == 6) {
-                    System.out.println("O programa foi encerrado...");
-                    break;
+                    return;
                 } else if (opc == 1) {
-                    List<String> listaPerguntas = FORMULARIO_REPOSITORY.carregarPerguntas();
+                    List<String> listaPerguntas = FORMULARIO_SERVICE.carregarPerguntas();
                     Pet pet = cadastrarNovoPet(input, listaPerguntas);
                     PET_SERVICE.salvarNovoPet(pet);
                 } else if (opc == 2) {
@@ -68,6 +96,87 @@ public class MenuMain {
                 System.out.println(e.getMessage());
             }
         }
+    }
+
+    private static void iniciarSistemaFormulario(Scanner input) {
+        while (true) {
+            try {
+                System.out.println("==================================================================================");
+                System.out.print("1. Criar nova pergunta\n" +
+                        "2. Alterar pergunta existente\n" +
+                        "3. Excluir pergunta existente\n" +
+                        "4. Voltar para o menu inicial\n" +
+                        "5. Sair\n" +
+                        "Selecione a sua opção: ");
+                String opcao = input.nextLine().trim();
+
+                if (!opcao.matches("[1-5]")) {
+                    System.out.println("Opção inválida, tente novamente...");
+                    continue;
+                }
+
+                int opc = Integer.parseInt(opcao);
+
+                if (opc == 1) {
+                    System.out.print("Digite a nova pergunta: ");
+                    String novaPergunta = input.nextLine();
+                    FORMULARIO_SERVICE.criarPergunta(novaPergunta);
+                    System.out.println("Pergunta criada com sucesso.");
+                } else if (opc == 2) {
+                    exibirPerguntasFormulario();
+                    System.out.print("Digite o número da pergunta que deseja alterar: ");
+                    int numeroPergunta = lerNumeroPositivo(input);
+                    System.out.print("Digite a nova pergunta: ");
+                    String novaPergunta = input.nextLine();
+                    FORMULARIO_SERVICE.alterarPergunta(numeroPergunta, novaPergunta);
+                    System.out.println("Pergunta alterada com sucesso.");
+                } else if (opc == 3) {
+                    exibirPerguntasFormulario();
+                    System.out.print("Digite o número da pergunta que deseja excluir: ");
+                    int numeroPergunta = lerNumeroPositivo(input);
+
+                    while (true) {
+                        System.out.print("Confirma a exclusão da pergunta? Digite SIM ou NÃO: ");
+                        String confirmacao = input.nextLine().trim();
+
+                        if (confirmacao.equalsIgnoreCase("SIM")) {
+                            FORMULARIO_SERVICE.excluirPergunta(numeroPergunta);
+                            System.out.println("Pergunta excluída com sucesso.");
+                            break;
+                        }
+
+                        if (confirmacao.equalsIgnoreCase("NÃO") || confirmacao.equalsIgnoreCase("NAO")) {
+                            System.out.println("Exclusão cancelada.");
+                            break;
+                        }
+
+                        System.out.println("Resposta inválida. Digite SIM ou NÃO.");
+                    }
+                } else if (opc == 4) {
+                    return;
+                } else if (opc == 5) {
+                    System.out.println("O programa foi encerrado...");
+                    System.exit(0);
+                }
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    private static void exibirPerguntasFormulario() {
+        List<String> perguntas = FORMULARIO_SERVICE.carregarPerguntas();
+        for (String pergunta : perguntas) {
+            System.out.println(pergunta);
+        }
+    }
+
+    private static int lerNumeroPositivo(Scanner input) {
+        String texto = input.nextLine().trim();
+        if (!texto.matches("\\d+") || Integer.parseInt(texto) <= 0) {
+            throw new IllegalArgumentException("Digite um número válido maior que zero.");
+        }
+        return Integer.parseInt(texto);
     }
 
     private static void listarTodosPets() {
@@ -114,7 +223,33 @@ public class MenuMain {
         System.out.println(listaPerguntas.get(6));
         String raca = lerRacaNova(input);
 
-        return new Pet(nomeCompleto, tipoPet, sexoDoPet, enderecoPet, idade, peso, raca);
+        List<String> respostasExtras = lerRespostasExtras(input, listaPerguntas);
+
+        return new Pet(nomeCompleto, tipoPet, sexoDoPet, enderecoPet, idade, peso, raca, respostasExtras);
+    }
+
+    private static List<String> lerRespostasExtras(Scanner input, List<String> listaPerguntas) {
+        List<String> respostasExtras = new ArrayList<>();
+
+        for (int i = 7; i < listaPerguntas.size(); i++) {
+            String perguntaCompleta = listaPerguntas.get(i);
+            System.out.println(perguntaCompleta);
+            String resposta = input.nextLine().trim();
+            if (resposta.isBlank()) {
+                resposta = Constantes.NAO_INFORMADO;
+            }
+            respostasExtras.add(extrairTextoPergunta(perguntaCompleta) + " - " + resposta);
+        }
+
+        return respostasExtras;
+    }
+
+    private static String extrairTextoPergunta(String perguntaCompleta) {
+        int posicaoSeparador = perguntaCompleta.indexOf(" - ");
+        if (posicaoSeparador < 0) {
+            return perguntaCompleta.trim();
+        }
+        return perguntaCompleta.substring(posicaoSeparador + 3).trim();
     }
 
     private static void alterarPetCadastrado(Scanner input) {
@@ -249,7 +384,8 @@ public class MenuMain {
                 enderecoAtualizado,
                 idadeAtualizada,
                 pesoAtualizado,
-                racaAtualizada
+                racaAtualizada,
+                petAtual.getRespostasExtras()
         );
     }
 

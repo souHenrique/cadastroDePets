@@ -3,7 +3,9 @@ package repository;
 import util.Constantes;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,5 +25,16 @@ public class FormularioRepository {
         }
 
         return perguntas;
+    }
+
+    public void salvarPerguntas(List<String> perguntas) {
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(Constantes.NOME_ARQUIVO_FORMULARIO))) {
+            for (String pergunta : perguntas) {
+                bufferedWriter.write(pergunta);
+                bufferedWriter.newLine();
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Erro ao salvar o formulário.");
+        }
     }
 }

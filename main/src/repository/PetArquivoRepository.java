@@ -70,6 +70,10 @@ public class PetArquivoRepository {
             bufferedWriter.newLine();
             bufferedWriter.write("7 - " + pet.getRaca());
             bufferedWriter.newLine();
+            for (int i = 0; i < pet.getRespostasExtras().size(); i++) {
+                bufferedWriter.write((8 + i) + " - " + pet.getRespostasExtras().get(i));
+                bufferedWriter.newLine();
+            }
         } catch (IOException e) {
             throw new IllegalStateException("Erro ao escrever no arquivo.");
         }
@@ -141,8 +145,12 @@ public class PetArquivoRepository {
         String idade = linhas.get(4);
         String peso = linhas.get(5);
         String raca = linhas.get(6);
+        List<String> respostasExtras = new ArrayList<>();
+        for (int i = 7; i < linhas.size(); i++) {
+            respostasExtras.add(linhas.get(i));
+        }
 
-        Pet pet = new Pet(nomeCompleto, tipoPet, sexoDoPet, endereco, idade, peso, raca);
+        Pet pet = new Pet(nomeCompleto, tipoPet, sexoDoPet, endereco, idade, peso, raca, respostasExtras);
         return new PetArquivo(pet, arquivo);
     }
 

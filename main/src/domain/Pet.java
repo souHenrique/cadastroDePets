@@ -3,6 +3,9 @@ package domain;
 import enums.SexoDoPet;
 import enums.TipoPet;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Pet {
     private String nomeCompleto;
     private TipoPet tipoPet;
@@ -11,8 +14,13 @@ public class Pet {
     private String idade;
     private String peso;
     private String raca;
+    private List<String> respostasExtras;
 
     public Pet(String nomeCompleto, TipoPet tipoPet, SexoDoPet sexoDoPet, Endereco endereco, String idade, String peso, String raca) {
+        this(nomeCompleto, tipoPet, sexoDoPet, endereco, idade, peso, raca, new ArrayList<>());
+    }
+
+    public Pet(String nomeCompleto, TipoPet tipoPet, SexoDoPet sexoDoPet, Endereco endereco, String idade, String peso, String raca, List<String> respostasExtras) {
         this.nomeCompleto = nomeCompleto;
         this.tipoPet = tipoPet;
         this.sexoDoPet = sexoDoPet;
@@ -20,6 +28,7 @@ public class Pet {
         this.idade = idade;
         this.peso = peso;
         this.raca = raca;
+        this.respostasExtras = respostasExtras;
     }
 
     public String getNomeCompleto() {
@@ -76,5 +85,13 @@ public class Pet {
 
     public void setRaca(String raca) {
         this.raca = raca;
+    }
+
+    public List<String> getRespostasExtras() {
+        return respostasExtras;
+    }
+
+    public void setRespostasExtras(List<String> respostasExtras) {
+        this.respostasExtras = respostasExtras;
     }
 }
